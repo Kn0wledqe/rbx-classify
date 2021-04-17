@@ -1,0 +1,12 @@
+{
+  "name": "rbx-classify",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "$path": "src"
+    }
+  }
+}
