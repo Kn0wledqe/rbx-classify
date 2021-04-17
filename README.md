@@ -10,9 +10,11 @@ Simply follow the steps below to get Classify installed and ready to use!
 
 ## Installing Classify
 **Method 1: Rojo**
+
 The Classify repository is fully rojo-compatible and can be inserted by simply cloning the repo and running `rojo serve` in your terminal.
 
 **Method 2: Copy and Paste**
+
 The easier way of using Classify in your project is to simply copy and paste the source code from ___src/Classify/init.lua___ into a ModuleScript. It's that easy!
 
 ## Loading the Module
