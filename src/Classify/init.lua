@@ -58,7 +58,7 @@ function deep_copy(input: table)
             rawset(result, deep_copy(index), deep_copy(value))
         end
         
-		setmetatable(result, deep_copy(getmetatable(input)))
+        setmetatable(result, deep_copy(getmetatable(input)))
     else
         result = input
     end
@@ -179,7 +179,7 @@ function classify(class: table)
                 item:Destroy()
             end
             
-		    index, item = next(disposables)
+            index, item = next(disposables)
         end
     end
     
