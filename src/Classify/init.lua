@@ -115,6 +115,8 @@ function classify(class: table)
     end
     
     proxy.__newindex = function(self, key, value)
+        local prop = false
+        
         if key == '__cleaning' and type(value) == 'function' then
             rawget(self, '__meta').destroyed = value
         end
@@ -123,6 +125,8 @@ function classify(class: table)
             local property = rawget(self, '__properties')[key]
             
             if property then
+                prop = true
+                
                 if property.set then
                     property.set(self, value)
                 elseif property.bind and property.target then
@@ -138,8 +142,7 @@ function classify(class: table)
         if meta then
             debug(STRINGS.NEWINDEX_ORIGINAL, class_name, key, value)
             meta(self, key, value)
-        else
-            debug(STRINGS.NEWINDEX_NEW, class_name, key, value)
+        elseif not prop then
             rawset(self, key, value)
         end
     end
