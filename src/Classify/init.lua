@@ -160,8 +160,8 @@ function classify(class: table)
             rawget(self, '__meta').destroyed(self, ...)
         end
         
-        self:_clean()
         self:_dispose()
+        self:_clean()
     end
     
     proxy._dispose = function(self)
