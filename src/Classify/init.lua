@@ -171,7 +171,7 @@ function classify(class: table)
         while item ~= nil do
             disposables[index] = nil
             
-            if typeof(item) == 'RBXScriptSignal' then
+            if typeof(item) == 'RBXScriptConnection' then
                 item:Disconnect()
             elseif type(item) == 'function' then
                 item()
