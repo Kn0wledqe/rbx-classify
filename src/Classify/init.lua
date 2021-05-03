@@ -96,7 +96,7 @@ function classify(class: table)
                 if property.get then
                     return property.get(self)
                 elseif property.bind and property.target then
-                    return property.target[property.bind]
+                    return property.target(self)[property.bind]
                 else
                     err(STRINGS.NOREAD_PROPERTY, key, class_name)
                 end
