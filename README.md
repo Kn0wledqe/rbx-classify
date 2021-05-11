@@ -60,6 +60,10 @@ If you see "Hello, world!" in the output: congratulations! You've successfully s
 ## Reserved Members
 Classify will always reserve some members of your class table. These members are extensions that the module adds for your use. Attempting to modify or overwrite these members will cause unpredictable (likely erroneous) behavior. They are as follows:
 
+**\<string\> ClassName**
+
+This is the default ClassName property automatically handled and generated for you by Classify. It returns the value of your internally specified `__classname`.
+
 **\<function\> ::Destroy(...: any)**
 
 This is the Destroy() function that is exposed to all code that uses your class. This function will automatically clean up all data associated with your class when called - including **disposables** (more on those below). It can be passed any number of arguments that will be forwarded to the `::__cleaning()` callback (more on that below too).
