@@ -120,7 +120,7 @@ Classify has a very simple and high-level inheritance system that allows you qui
 
 #### Current Limitations and Important Notes:
 - To increase stability and reduce processing times for `::inherit(class)` calls, Classify will only allow the inheritance of other Classify-wrapped classes.
-- Classify currently overwrites inherited metatable with the inheritor's metatable data. This is a Luau limitation and cannot be overcome in the current version.
+- Classify currently overwrites inherited metatable data with the inheritor's metatable. This is a Luau limitation and cannot be overcome in the current version.
 - If a property is inherited that already exists in the inheritor, Classify will skip the importation of said property and output a warning.
 - If the inherited class contains a `::__cleaning(...)` callback, it will be ran *before* the inheritor's callback (if assigned).
 - Inheritance should be performed in the inheritor's `.new()` constructor function to ensure the inherited data is available to code that uses your class at run time.
