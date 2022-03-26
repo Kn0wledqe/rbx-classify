@@ -219,7 +219,7 @@ MyClass.__properties = {
     MyProperty = {
         bind = 'Text',
         target = function(self)
-		    return path.to.a.Textbutton
+	    return path.to.a.Textbutton
         end
     }
 }
@@ -309,4 +309,4 @@ It's a little extra, but it just gives you a very light example of how you can c
 # The End
 That's pretty much all there is to it. You can get pretty creative with Classify. How deep you want to take its functionality is completely up to you.
 
-That's all, folks. Hit my up on Discord (**FriendlyBiscuit#0445**) if you have any issues, questions, or suggestions.
+That's all, folks. Hit me up on Discord (**FriendlyBiscuit#0445**) if you have any issues, questions, or suggestions.
