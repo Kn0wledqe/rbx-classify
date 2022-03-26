@@ -34,12 +34,12 @@ local MyClass = { }
 MyClass.__classname = "MyNewClass" -- this is REQUIRED for Classify to accept your code
 
 function MyClass.new()
-	local self = classify(MyClass)
-	return self
+    local self = classify(MyClass)
+    return self
 end
 
 function MyClass:SayHello()
-	print("Hello, world!")
+    print("Hello, world!")
 end
 
 return MyClass
@@ -59,6 +59,10 @@ If you see "Hello, world!" in the output: congratulations! You've successfully s
 
 ## Reserved Members
 Classify will always reserve some members of your class table. These members are extensions that the module adds for your use. Attempting to modify or overwrite these members will cause unpredictable (likely erroneous) behavior. They are as follows:
+
+**\<string\> ClassName**
+
+This is the default ClassName property automatically handled and generated for you by Classify. It returns the value of your internally specified `__classname`.
 
 **\<function\> ::Destroy(...: any)**
 
@@ -80,13 +84,13 @@ Example:
 ```lua
 -- Your Class Script
 function MyClass.new()
-	local self = classify(MyClass)
-	local button = Instance.new("TextButton")
-	
-	self:_mark_disposable(button)
-	-- The TextButton will now be destroyed when ::Destroy() is called on this class
-	
-	return self
+    local self = classify(MyClass)
+    local button = Instance.new("TextButton")
+    
+    self:_mark_disposable(button)
+    -- The TextButton will now be destroyed when ::Destroy() is called on this class
+    
+    return self
 end
 ```
 
@@ -102,18 +106,18 @@ If you need to execute a specific routine before the class and disposables are d
 ```lua
 -- Your Class Script
 function MyClass.new()
-	local self = classify(MyClass)
-	local button = Instance.new("TextButton")
-	
-	self:_mark_disposable(button)
-	
-	return self
+    local self = classify(MyClass)
+    local button = Instance.new("TextButton")
+    
+    self:_mark_disposable(button)
+    
+    return self
 end
 
 function MyClass:__cleaning(...)
-	print("We're cleaning up! Arguments:", ...)
-	-- Your code goes here.
-	-- This will be invoked and will yield the cleaning process until it's complete.
+    print("We're cleaning up! Arguments:", ...)
+    -- Your code goes here.
+    -- This will be invoked and will yield the cleaning process until it's complete.
 end
 ```
 ```lua
@@ -136,11 +140,11 @@ Getters are functions that fetch and return data on a property is referenced. Ex
 ```lua
 -- Your Class Script
 MyClass.__properties = {
-	Name = {
-		get = function(self)
-			return self._name
-		end
-	}
+    Name = {
+        get = function(self)
+            return self._name
+        end
+    }
 }
 ```
 
@@ -149,14 +153,14 @@ Setters are functions that do the opposite. The take data provided to the proper
 ```lua
 -- Your Class Script
 MyClass.__properties = {
-	Name = {
-		get = function(self) -- You can do both at the same time!
-			return self._name
-		end,
-		set = function(self, value: string)
-			self._name = value
-		end
-	}
+    Name = {
+        get = function(self) -- You can do both at the same time!
+            return self._name
+        end,
+        set = function(self, value: string)
+            self._name = value
+        end
+    }
 }
 ```
 
@@ -167,10 +171,10 @@ To create a bind, you'll need to provide a `target` function that returns the us
 ```lua
 -- Your Class Script
 MyClass.__properties = {
-	Text = {
-		bind = "Text",
-		target = function(self) return self._button end
-	}
+    Text = {
+        bind = "Text",
+        target = function(self) return self._button end
+    }
 }
 ```
 ```lua
