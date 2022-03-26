@@ -239,6 +239,12 @@ function Classify.prototype:Inherit(dependency: any): table
         end
     end
     
+    local inherit_callback = rawget(dependency, '__inherited')
+    
+    if inherit_callback then
+        inherit_callback(dependency, self)
+    end
+    
     return self
 end
 
