@@ -92,7 +92,7 @@ Classify will always reserve some members and functions in your main class table
 ## Handling Cleanup
 Classify will automatically handle the cleanup of class memory when `::Destroy()` is called. However, Classify does *not* destroy Roblox instances that are created by your class or stored in its memory. To get around this, Classify exposes two functions that allow you to mark them as "disposable": `::_mark_disposable(...)` and `::_mark_disposables({...})` - both of which are documented under the **Reserved Members & Functions** section above.
 
-It accepts the same argument types as a standard Maid: any table with a `::Destroy()` method, Roblox instance, RBXScriptSignal, of function. Example:
+It accepts the same argument types as a standard Maid: any table with a `::Destroy()` method, a Roblox Instance, RBXScriptSignal, or function. Example:
 
 ```lua
 function MyClass.new()
