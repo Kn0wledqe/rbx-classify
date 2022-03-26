@@ -178,7 +178,7 @@ print(Test.CustomSuperProperty) --> "SuperClass Custom Property!"
 ```
 
 ## Custom Properties
-Classify exposes a high level way to implement custom properties into your classes with four key property handlers: **getters**, **setters**, **targeted binds**, and **internal binds**.
+Classify offers functionality to implement custom properties into your classes with four key property handlers: **getters**, **setters**, **targeted binds**, and **internal binds**.
 
 ### Creating Your First Property
 Classify looks for an internal table called `__properties` in your class data to process custom properties. All custom property code handlers go in this table. Example:
