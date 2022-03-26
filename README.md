@@ -1,5 +1,6 @@
 
 
+
 **rbx-classify** (or simply **Classify**) is a simple-to-use super constructor that simplifies the OOP class-creation and clean-up coding process in Roblox Lua.
 
 Its main goal is to simplify the custom-property creation process for classes that don't use or wrap Roblox instances (and therefore cannot make use of Attributes). It also completely removes the need for the programmer (you!) to have to handle metatables, cleanup, and table proxying.
@@ -119,10 +120,10 @@ Classify has a very simple and high-level inheritance system that allows you qui
 
 #### Current Limitations and Important Notes:
 - To increase stability and reduce processing times for `::inherit(class)` calls, Classify will only allow the inheritance of other Classify-wrapped classes.
-- Classify currently overwrites inherited metatable with the child metatable data. This is a Luau limitation and cannot be overcome in the current version.
-- If a property is inherited that already exists in the child class, Classify will skip the importation of said property and output a warning.
-- If the inherited class contains a `::__cleaning(...)` callback, it will be ran *before* the child class's callback (if assigned).
-- Inheritance should be performed in the child class's `.new()` constructor function to ensure the inherited data is available to code that uses your class at run time.
+- Classify currently overwrites inherited metatable with the inheritor's metatable data. This is a Luau limitation and cannot be overcome in the current version.
+- If a property is inherited that already exists in the inheritor, Classify will skip the importation of said property and output a warning.
+- If the inherited class contains a `::__cleaning(...)` callback, it will be ran *before* the inheritor's callback (if assigned).
+- Inheritance should be performed in the inheritor's `.new()` constructor function to ensure the inherited data is available to code that uses your class at run time.
 - Any code that runs in the inherited class's `.new()` constructor ***will not run***, as `.new()` is overwritten by the inheritor.
 
 Here is a very simple example of an example class ("ChildClass") inheriting another example class ("SuperClass")
