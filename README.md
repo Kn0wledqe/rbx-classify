@@ -80,7 +80,7 @@ Classify will always reserve some members and functions in your main class table
 ### Functions
 | Function & Aliases  | Description |
 |--|--|
-| `::Destroy(...)` | A pre-built all-encompassing destroy method that tells Classify to call your optionally-assigned `::__cleaning()` callback (with any arguments supplied to `::Destroy()`, clean up all class memory, dispose of marked instances, and lock the metatable of your class. |
+| `::Destroy(...)` | A pre-built all-encompassing destroy method that tells Classify to call your optionally-assigned `::__cleaning()` callback with any arguments supplied to `::Destroy()`, clean up all class memory, dispose of marked instances, and lock the metatable of your class. |
 | `::__cleaning(...)`  | An optional yielding callback that is ran by Classify when `::Destroy()` is called on your class. Any arguments passed through `::Destroy()` are passed through. |
 | `::_clean()` | Internal function called by the built-in `::Destroy()` method that cleans up all class memory. You shouldn't need this. |
 | `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked disposable instances. You shouldn't need this. |
