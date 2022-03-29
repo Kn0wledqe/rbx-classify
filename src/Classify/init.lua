@@ -281,6 +281,8 @@ end
 Classify.prototype.inherit = Classify.prototype.Inherit
 Classify.prototype.markDisposable = Classify.prototype._mark_disposable
 Classify.prototype.markDisposables = Classify.prototype._mark_disposables
+Classify.prototype._markDisposable = Classify.prototype._mark_disposable
+Classify.prototype._markDisposables = Classify.prototype._mark_disposables
 
 --= Main Module Function =--
 function Classify.classify(class: table): any
