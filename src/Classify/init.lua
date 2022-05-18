@@ -5,7 +5,7 @@
     \__/_/\_,_/___/___/_/_/ \_, /
     Classify - OOP Helper  /___/
     By FriendlyBiscuit
-    v2.0.0
+    v2.0.02
 --]]
 
 --= Root Table =--
@@ -216,6 +216,10 @@ function Classify.prototype:Inherit(dependency: any): table
         elseif index == '__meta' then
             for _, callback in pairs(raw.clean_callbacks) do
                 table.insert(rawget(self, '__meta').clean_callbacks, callback)
+            end
+            
+            for _, disposable in pairs(raw.disposables) do
+                table.insert(rawget(self, '__meta').disposables, disposable)
             end
         elseif index == '__properties' then
             local d_properties = rawget(copy, '__properties')
