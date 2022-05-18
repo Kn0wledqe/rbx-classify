@@ -5,7 +5,7 @@
     \__/_/\_,_/___/___/_/_/ \_, /
     Classify - OOP Helper  /___/
     By FriendlyBiscuit
-    v2.0.02
+    v2.0.0
 --]]
 
 --= Root Table =--
@@ -196,7 +196,7 @@ function Classify.prototype:_clean(): nil
     })
 end
 
-function Classify.prototype:Inherit(dependency: any): table
+function Classify.prototype:_inherit(dependency: any): table
     local copy = deep_copy(dependency)
     local d_class_name = rawget(copy, '__classname')
     local s_class_name = rawget(self, '__classname')
@@ -282,7 +282,8 @@ function Classify.prototype:Destroy(...): nil
     self:_clean()
 end
 
-Classify.prototype.inherit = Classify.prototype.Inherit
+Classify.prototype.inherit = Classify.prototype._inherit
+Classify.prototype.Inherit = Classify.prototype._inherit
 Classify.prototype.markDisposable = Classify.prototype._mark_disposable
 Classify.prototype.markDisposables = Classify.prototype._mark_disposables
 Classify.prototype._markDisposable = Classify.prototype._mark_disposable
