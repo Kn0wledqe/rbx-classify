@@ -84,7 +84,23 @@ function Classify.meta.__index(self: table, key: string): any
             elseif property.bind and property.target then
                 return property.target(self)[property.bind]
             elseif property.internal then
-                return rawget(self, property.internal)
+                local nodes = { }
+                
+                for node in property.internal:gmatch('([^.]+)') do
+                    table.insert(nodes, node)
+                end
+                
+                if nodes and #nodes > 0 then
+                    local prop = self
+                    
+                    for _, node in ipairs(nodes) do
+                        prop = rawget(prop, node)
+                    end
+                    
+                    return prop
+                else
+                    return rawget(self, property.internal)
+                end
             else
                 err(MESSAGES.NOREAD_PROPERTY, key, rawget(self, '__classname'))
             end
@@ -109,9 +125,29 @@ function Classify.meta.__newindex(self: table, key: string, value: any): nil
         
         if property then
             if property.internal then
-                rawset(self, property.internal, value)
-                success = true
-                p_signal = true
+                local nodes = {}
+                for node in property.internal:gmatch('([^.]+)') do
+                    table.insert(nodes, node)
+                end
+                
+                if nodes and #nodes > 0 then
+                    local prop = self
+                    local target = nodes[#nodes]
+                    
+                    for index, node in ipairs(nodes) do
+                        if next(nodes, index) ~= nil then
+                            prop = rawget(prop, node)
+                        end
+                    end
+                    
+                    rawset(prop, target, value)
+                    success = true
+                    p_signal = true
+                else
+                    rawset(self, property.internal, value)
+                    success = true
+                    p_signal = true
+                end
             end
             
             if property.set then
