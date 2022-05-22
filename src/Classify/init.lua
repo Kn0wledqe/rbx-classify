@@ -84,18 +84,19 @@ function Classify.meta.__index(self: table, key: string): any
             elseif property.bind and property.target then
                 return property.target(self)[property.bind]
             elseif property.internal then
-                local nodes = {}
-
+                local nodes = { }
+                
                 for node in property.internal:gmatch('([^.]+)') do
                     table.insert(nodes, node)
                 end
-
+                
                 if nodes and #nodes > 0 then
                     local prop = self
+                    
                     for _, node in ipairs(nodes) do
                         prop = rawget(prop, node)
                     end
-
+                    
                     return prop
                 else
                     return rawget(self, property.internal)
@@ -128,17 +129,17 @@ function Classify.meta.__newindex(self: table, key: string, value: any): nil
                 for node in property.internal:gmatch('([^.]+)') do
                     table.insert(nodes, node)
                 end
-
+                
                 if nodes and #nodes > 0 then
                     local prop = self
                     local target = nodes[#nodes]
-
+                    
                     for index, node in ipairs(nodes) do
                         if next(nodes, index) ~= nil then
                             prop = rawget(prop, node)
                         end
                     end
-
+                    
                     rawset(prop, target, value)
                     success = true
                     p_signal = true
