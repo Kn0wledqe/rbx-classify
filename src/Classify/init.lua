@@ -16,7 +16,7 @@ local SUPPRESS_ERROR   = false
 local MESSAGES         = {
     NO_CLASS_NAME = 'Failed to classify table - "__classname" must be defined.';
     READONLY_PROPERTY = 'Failed to set property "%s" of "%s" - property is read-only.';
-    ZERO_DISPOSABLES = 'Cannot :_mark_disposables() with zero items provided.';
+    ZERO_DISPOSABLES = 'Cannot :_markTrash() with zero items provided.';
     INVALID_CLASS = '%q cannot inherit  %q - target dependency is not a valid Classify class.';
     INDEX_ALREADY_EXISTS = '%q cannot inherit %q - %q already exists in the inheritor.';
     PROPERTY_ALREADY_EXISTS = 'Duplicate inherited property %q from %q has been overwritten in %q.';
@@ -70,6 +70,7 @@ end
 --= Meta-Functions =--
 function Classify.meta.__index(self: table, key: string): any
     local properties = rawget(self, '__properties')
+    local redirect = rawget(self, '__meta').nil_target
     
     if key == 'ClassName' then
         return rawget(self, '__classname')
@@ -86,8 +87,14 @@ function Classify.meta.__index(self: table, key: string): any
             elseif property.internal then
                 return rawget(self, property.internal)
             else
-                err(MESSAGES.NOREAD_PROPERTY, key, rawget(self, '__classname'))
+                if redirect then
+                    return redirect[key]
+                end
             end
+        end
+    else
+        if redirect then
+            return redirect[key]
         end
     end
     
@@ -127,7 +134,7 @@ function Classify.meta.__newindex(self: table, key: string, value: any): nil
             end
             
             if p_signal then
-                for _, signal in pairs(rawget(self, '__meta').p_signals) do
+                for _, signal in rawget(self, '__meta').p_signals do
                     if signal[1] == key then
                         signal[2]:Fire(value)
                     end
@@ -141,7 +148,14 @@ function Classify.meta.__newindex(self: table, key: string, value: any): nil
     end
     
     if not success then
-        rawset(self, key, value)
+        local redirect = rawget(self, '__meta').nil_target
+        
+        if redirect then
+            redirect[key] = value
+            success = true
+        else
+            rawset(self, key, value)
+        end
     end
 end
 
@@ -150,26 +164,22 @@ function Classify.meta.__tostring(self: table): string
 end
 
 --= Prototype/Injected Functions =--
-function Classify.prototype:_mark_disposable(trash: any): nil
-    table.insert(rawget(self, '__meta').disposables, trash)
-end
-
-function Classify.prototype:_mark_disposables(...): nil
-    if #{...} > 0 then
-        for _, item in pairs(...) do
-            table.insert(rawget(self, '__meta').disposables, item)
+function Classify.prototype:_markTrash(trash: any): nil
+    if type(trash) == 'table' and not trash.Destroy then
+        for _, trash_item in trash do
+            table.insert(rawget(self, '__meta').trash, trash_item)
         end
     else
-        err(MESSAGES.ZERO_DISPOSABLES)
+        table.insert(rawget(self, '__meta').trash, trash)
     end
 end
 
 function Classify.prototype:_dispose(): nil
-    local disposables = rawget(self, '__meta').disposables
-    local index, item = next(disposables)
+    local trash_items = rawget(self, '__meta').trash
+    local index, item = next(trash_items)
     
     while item ~= nil do
-        disposables[index] = nil
+        trash_items[index] = nil
         
         if typeof(item) == 'RBXScriptConnection' then
             item:Disconnect()
@@ -179,12 +189,12 @@ function Classify.prototype:_dispose(): nil
             item:Destroy()
         end
         
-        index, item = next(disposables)
+        index, item = next(trash_items)
     end
 end
 
 function Classify.prototype:_clean(): nil
-    for index, _ in pairs(self) do
+    for index, _ in self do
         rawset(self, index, nil)
     end
     
@@ -214,19 +224,19 @@ function Classify.prototype:_inherit(dependency: any): table
         elseif index == '__newindex' then
             table.insert(rawget(self, '__meta').d_newindex, value)
         elseif index == '__meta' then
-            for _, callback in pairs(raw.clean_callbacks) do
+            for _, callback in raw.clean_callbacks do
                 table.insert(rawget(self, '__meta').clean_callbacks, callback)
             end
             
-            for _, disposable in pairs(raw.disposables) do
-                table.insert(rawget(self, '__meta').disposables, disposable)
+            for _, trash_item in raw.trash do
+                table.insert(rawget(self, '__meta').trash, trash_item)
             end
         elseif index == '__properties' then
             local d_properties = rawget(copy, '__properties')
             local s_properties = rawget(self, '__properties')
             
             if d_properties and s_properties then
-                for property, data in pairs(d_properties) do
+                for property, data in d_properties do
                     if s_properties[property] ~= nil then
                         wrn(MESSAGES.PROPERTY_ALREADY_EXISTS, property, d_class_name, s_class_name)
                     end
@@ -252,6 +262,10 @@ function Classify.prototype:_inherit(dependency: any): table
     return self
 end
 
+function Classify.prototype:_redirectNullProperties(target: Instance)
+    rawget(self, '__meta').nil_target = target
+end
+
 function Classify.prototype:GetPropertyChangedSignal(target: string): RBXScriptConnection|nil
     local properties = rawget(self, '__properties')
     
@@ -274,7 +288,7 @@ end
 function Classify.prototype:Destroy(...): nil
     local clean_callbacks = rawget(self, '__meta').clean_callbacks
     
-    for _, callback in pairs(clean_callbacks) do
+    for _, callback in clean_callbacks do
         callback(self, ...)
     end
     
@@ -282,15 +296,11 @@ function Classify.prototype:Destroy(...): nil
     self:_clean()
 end
 
-Classify.prototype.inherit = Classify.prototype._inherit
-Classify.prototype.Inherit = Classify.prototype._inherit
-Classify.prototype.markDisposable = Classify.prototype._mark_disposable
-Classify.prototype.markDisposables = Classify.prototype._mark_disposables
-Classify.prototype._markDisposable = Classify.prototype._mark_disposable
-Classify.prototype._markDisposables = Classify.prototype._mark_disposables
+Classify.prototype._markDisposable = Classify.prototype._markTrash
+Classify.prototype._markDisposables = Classify.prototype._markTrash
 
 --= Main Module Function =--
-function Classify.classify(class: table): any
+function Classify.classify(class: {}): any
     local class_name = rawget(class, '__classname')
     
     if class_name == nil then
@@ -307,7 +317,7 @@ function Classify.classify(class: table): any
         clean_callbacks = { rawget(proxy, '__cleaning') },
         d_index = { },
         d_newindex = { },
-        disposables = { },
+        trash = { },
         p_signals = { },
         signals = { }
     })
