@@ -1,6 +1,7 @@
 
 
 
+
 **rbx-classify** (or simply **Classify**) is a simple-to-use super constructor that simplifies the OOP class-creation and clean-up coding process in Roblox Lua.
 
 Its main goal is to simplify the custom-property creation process for classes that don't use or wrap Roblox instances (and therefore cannot make use of Attributes). It also completely removes the need for the programmer (you!) to have to handle metatables, cleanup, and table proxying.
@@ -84,9 +85,9 @@ Classify will always reserve some members and functions in your main class table
 | `::__cleaning(...)`  | An optional yielding callback that is ran by Classify when `::Destroy()` is called on your class. Any arguments passed through `::Destroy()` are passed through. |
 | `::_clean()` | Internal function called by the built-in `::Destroy()` method that cleans up all class memory. You shouldn't need this. |
 | `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked disposable instances. You shouldn't need this. |
-| `::_mark_disposable(...)` `::markDisposable(...)` | Marks a table (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. |
-| `::_mark_disposables({...})`  `::markDisposables({...})` | Same as `::_mark_disposable()`, but accepts a table of data instead. |
-| `::Inherit(class)` `::inherit(class)` | Copies inheritable data from another class onto the current one. |
+| `::_markDisposable(...)` | Marks a table (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. |
+| `::_markDisposables({...})` | Same as `::_mark_disposable()`, but accepts a table of data instead. |
+| `::_inherit(class)` | Copies inheritable data from another class onto the current one. |
 | `::__inherited(childClass)` | An optional yielding callback that is ran by Classify when the class is inherited. It passes the child class data in case you need to do any mandatory processing for the inheritance to work correctly. |
 | `::GetPropertyChangedSignal(property)` | Creates and returns an RBXScriptSignal that fires (with the target value) when the specified property changes. |
 
