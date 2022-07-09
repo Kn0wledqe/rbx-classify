@@ -25,7 +25,7 @@ local MESSAGES         = {
 }
 
 --= Internal Functions =--
-function wrn(message: string, ...): nil
+function wrn(message: string, ...)
     if SUPPRESS_ERROR then return end
     
     if #{...} > 0 then
@@ -35,7 +35,7 @@ function wrn(message: string, ...): nil
     warn(message)
 end
 
-function err(message: string, ...): nil
+function err(message: string, ...)
     if SUPPRESS_ERROR then return end
     
     if #{...} > 0 then
@@ -117,7 +117,7 @@ function Classify.meta.__index(self: table, key: string): any
     return rawget(self, key)
 end
 
-function Classify.meta.__newindex(self: table, key: string, value: any): nil
+function Classify.meta.__newindex(self: table, key: string, value: any)
     local properties = rawget(self, '__properties')
     local success = false
     
@@ -200,7 +200,7 @@ function Classify.meta.__tostring(self: table): string
 end
 
 --= Prototype/Injected Functions =--
-function Classify.prototype:_markTrash(trash: any): nil
+function Classify.prototype:_markTrash(trash: any)
     if type(trash) == 'table' and not trash.Destroy then
         for _, trash_item in trash do
             table.insert(rawget(self, '__meta').trash, trash_item)
@@ -210,7 +210,7 @@ function Classify.prototype:_markTrash(trash: any): nil
     end
 end
 
-function Classify.prototype:_dispose(): nil
+function Classify.prototype:_dispose()
     local trash_items = rawget(self, '__meta').trash
     local index, item = next(trash_items)
     
@@ -242,7 +242,7 @@ function Classify.prototype:_clean(): nil
     })
 end
 
-function Classify.prototype:_inherit(dependency: any): table
+function Classify.prototype:_inherit(dependency: any): {}
     local copy = deep_copy(dependency)
     local d_class_name = rawget(copy, '__classname')
     local s_class_name = rawget(self, '__classname')
@@ -321,7 +321,7 @@ function Classify.prototype:GetPropertyChangedSignal(target: string): RBXScriptC
     end
 end
 
-function Classify.prototype:Destroy(...): nil
+function Classify.prototype:Destroy(...)
     local clean_callbacks = rawget(self, '__meta').clean_callbacks
     
     for _, callback in clean_callbacks do
