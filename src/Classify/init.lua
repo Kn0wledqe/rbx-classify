@@ -122,7 +122,7 @@ function Classify.meta.__newindex(self: table, key: string, value: any)
     local success = false
     
     if key == '__cleaning' and type(value) == 'function' then
-        rawget(self, '__meta').clean_callback = value
+        table.insert(rawget(self, '__meta').clean_callbacks, value)
         return
     end
     
