@@ -86,8 +86,9 @@ Classify will always reserve some members and functions in your main class table
 | `::__cleaning(...)`  | An optional yielding callback that is ran by Classify when `::Destroy()` is called on your class. Any arguments passed through `::Destroy()` are passed through. |
 | `::_clean()` | Internal function called by the built-in `::Destroy()` method that cleans up all class memory. You shouldn't need this. |
 | `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked disposable instances. You shouldn't need this. |
-| `::_markTrash(Instance|{})` | Marks a table or (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. Also works with a list of those as well. ||
+| `::_markTrash(Instance|{})` | Marks a table or (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. Also works with a list of those as well. |
 | `::_inherit(class)` | Copies inheritable data from another class onto the current one. |
+| `::_redirectNullProperties(Instance)` | Redirects null custom properties to the target instance. Essentially like importing an object's properties into your class. |
 | `::__inherited(childClass)` | An optional yielding callback that is ran by Classify when the class is inherited. It passes the child class data in case you need to do any mandatory processing for the inheritance to work correctly. |
 | `::GetPropertyChangedSignal(property)` | Creates and returns an RBXScriptSignal that fires (with the target value) when the specified property changes. |
 
