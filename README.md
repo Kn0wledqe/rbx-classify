@@ -92,15 +92,15 @@ Classify will always reserve some members and functions in your main class table
 | `::Destroy(...)` | A pre-built all-encompassing destroy method that tells Classify to call your optionally-assigned `::__cleaning()` callback with any arguments supplied to `::Destroy()`, clean up all class memory, dispose of marked instances, and lock the metatable of your class. |
 | `::__cleaning(...)`  | An optional yielding callback that is ran by Classify when `::Destroy()` is called on your class. Any arguments passed through `::Destroy()` are passed through. |
 | `::_clean()` | Internal function called by the built-in `::Destroy()` method that cleans up all class memory. You shouldn't need this. |
-| `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked disposable instances. You shouldn't need this. |
-| `::_markDisposable(...)` | Marks a table (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. |
-| `::_markDisposables({...})` | Same as `::_mark_disposable()`, but accepts a table of data instead. |
+| `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked trash. You shouldn't need this. |
+| `::_markTrash(Instance)` `::_markTrash({})` | Marks a table or (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. Also works with a list of those as well. |
 | `::_inherit(class)` | Copies inheritable data from another class onto the current one. |
+| `::_redirectNullProperties(Instance)` | Redirects null custom properties to the target instance. Essentially like importing an object's properties into your class. |
 | `::__inherited(childClass)` | An optional yielding callback that is ran by Classify when the class is inherited. It passes the child class data in case you need to do any mandatory processing for the inheritance to work correctly. |
 | `::GetPropertyChangedSignal(property)` | Creates and returns an RBXScriptSignal that fires (with the target value) when the specified property changes. |
 
 ## Handling Cleanup
-Classify will automatically handle the cleanup of class memory when `::Destroy()` is called. However, Classify does *not* destroy Roblox instances that are created by your class or stored in its memory. To get around this, Classify exposes two functions that allow you to mark them as "disposable": `::_mark_disposable(...)` and `::_mark_disposables({...})` - both of which are documented under the **Reserved Members & Functions** section above.
+Classify will automatically handle the cleanup of class memory when `::Destroy()` is called. However, Classify does *not* destroy Roblox instances that are created by your class or stored in its memory. To get around this, Classify exposes two functions that allow you to mark them as "trash": `::_markTrash(...)` - both of which are documented under the **Reserved Members & Functions** section above.
 
 It accepts the same argument types as a standard Maid: any table with a `::Destroy()` method, a Roblox Instance, RBXScriptSignal, or function. Example:
 
@@ -110,13 +110,13 @@ function MyClass.new()
     
     local button =  Instance.new("TextButton")
     
-    self:markDisposable(button) -- this button will now be destroyed when the class is destroyed
+    self:_markTrash(button) -- this button will now be destroyed when the class is destroyed
     
     return  self
 end
 ```
 
-You can also bind a callback to intercept when your class is destroyed called `::__cleaning(...)`. This callback will yield the destruction and cleanup process until it finishes execution. It is also the first step in the cleanup chain, so you can still access class memory and marked disposables. Example:
+You can also bind a callback to intercept when your class is destroyed called `::__cleaning(...)`. This callback will yield the destruction and cleanup process until it finishes execution. It is also the first step in the cleanup chain, so you can still access class memory and marked trash. Example:
 
 ```lua
 function MyClass:__cleaning(...)
@@ -165,7 +165,7 @@ ChildClass.__classname = "ChildClass"
 
 function ChildClass.new()
     local self = classify(ChildClass)
-    self:inherit(SuperClass)
+    self:_inherit(SuperClass)
     return self
 end
 
@@ -228,7 +228,7 @@ MyClass.__properties = {
     MyProperty = {
         bind = 'Text',
         target = function(self)
-	    return path.to.a.Textbutton
+	        return path.to.a.Textbutton
         end
     }
 }
