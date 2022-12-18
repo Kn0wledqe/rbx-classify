@@ -302,7 +302,7 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any)
 	for _, callback in superMeta.CleaningCallbacks do
 		table.insert(selfMeta.CleaningCallbacks, callback)
 	end
-	
+
 	for _, key in superMeta.ProtectedKeys do
 		table.insert(selfMeta.ProtectedKeys, key)
 	end
