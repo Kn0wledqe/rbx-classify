@@ -1,26 +1,34 @@
+# Table of Contents
+1. [What is Classify](#what-is-classify) - *A short explanation of Classify's purpose*
+2. [Getting Started](#getting-started) - *Getting Classify installed into your project*
+    1. [Get the Source Code](#get-the-source-code) - *Where to find the latest release*
+    2. [Install Into Your Project](#install-into-your-project) - *How and where to install the module*
+    3. [Load the Module](#load-the-module) - *How to require the module*
 
+<br><br>
 
+# What is Classify?
+**Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
-
-**rbx-classify** (or simply **Classify**) is a simple-to-use super constructor that simplifies the OOP class-creation and clean-up coding process in Roblox Lua.
-
-Its main goal is to simplify the custom-property creation process for classes that don't use or wrap Roblox instances (and therefore cannot make use of Attributes). It also completely removes the need for the programmer (you!) to have to handle metatables, cleanup, and table proxying.
-
-**Before you continue:** it is STRONGLY recommended that you have a basic understanding of object-oriented programming practices and understand the purpose of an OOP workflow in the first place!
+It is highly recommended that you have a moderate-level understanding of the following before bringing Classify into your project:
+- What Lua metatables are and how they work.
+    - Specifically, the `__index` and `__newindex` metamethods.
+- What Object-Oriented Programming actually means and when to use it.
+- How to write performant, memory-respecting code.
+<br><br>
 
 # Getting Started
-Simply follow the steps below to get Classify installed and ready to use!
+## Get the Source Code
+You can fetch the latest release of Classify from the following sources:
+- The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.
+- By directly copying the [latest source code file] from the main branch.
+<br><br>
 
-## Installing Classify
-**Method 1: Rojo**
+## Install Into Your Project
+The Classify module is a single source file that is placed into a `ModuleScript` anywhere in your project hierarchy. **NOTE:** I recommend keeping it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
+<br><br>
 
-The Classify repository is fully rojo-compatible and can be inserted by simply cloning the repo and running `rojo serve` in your terminal.
-
-**Method 2: Copy and Paste**
-
-The easier way of using Classify in your project is to simply copy and paste the source code from `src/Classify/init.lua` into a ModuleScript. It's that easy!
-
-## Loading the Module
+## Load the Module
 Once you have the source code where you want it, you'll simply require it like you would any other ModuleScript:
 
 ```lua
