@@ -26,7 +26,7 @@ It is highly recommended that you have a moderate-level understanding of the fol
 - What Object-Oriented Programming actually means and when to use it.
 - How to write performant, memory-respecting code.
 
-<br><br><br>
+<br><br>
 
 # Getting Started
 ## Getting the Source Code
@@ -47,7 +47,7 @@ Once you've installed classify into your project, all you'll need to do is requi
 ```lua
 local Classify = require(path.to.Classify)
 ```
-<br><br><br>
+<br><br>
 
 # Introductory Guide
 ## Creating a Class
@@ -146,7 +146,7 @@ Test.Name = "Foo"
 
 print(Test.Name) --> "Foo"
 ```
-<br><br><br>
+<br><br>
 
 # Advanced Guide & Documentation
 Everything below will cover all advanced features and nuances of Classify. It is strongly recommend that you have a higher level understanding of OOP in Luau before diving in to this documentation.
