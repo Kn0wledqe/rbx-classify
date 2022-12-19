@@ -1,24 +1,23 @@
 # **Table of Contents**
 **Click on any of the links below to quick jump to a section:**
-1. [What is Classify](#what-is-classify)
-2. [Getting Started](#getting-started)
-    1. [Geting the Source Code](#geting-the-source-code)
-    2. [Installing Into Your Project](#installing-into-your-project)
-    3. [Loading the Module](#loading-the-module)
-3. [Introductory Guide](#introductory-guide)
-    1. [Creating a Class](#creating-a-class)
-    2. [Using the Class](#using-the-class)
-    3. [Creating a Basic Custom Property](#creating-a-basic-custom-property)
-4. [Advanced Guide & Documentation](#advanced-guide--documentation)
-    1. [Destroying & Class Cleanup](#destroying--class-cleanup)
-        1. [Destroy Function](#destroy-function)
-        2. [Handling Trash](#handling-trash)
-        3. [Detecting Destruction](#detecting-destruction)
-        4. [Cleanup Example(s)](#cleanup-examples)
+1. [What is Classify](#1---what-is-classify)
+2. [Getting Started](#2---getting-started)
+    1. [Geting the Source Code](#21---getting-the-source-code)
+    2. [Installing Into Your Project](#22---installing-into-your-project)
+    3. [Loading the Module](#23---loading-the-module)
+3. [Introductory Guide](#3---introductory-guide)
+    1. [Creating a Class](#31---creating-a-class)
+    2. [Using the Class](#32---using-the-class)
+    3. [Creating a Basic Custom Property](#33---creating-a-basic-custom-property)
+4. [Advanced Guide & Documentation](#4---advanced-guide--documentation)
+    1. [Destroying & Class Cleanup](#41---destroying--class-cleanup)
+        1. [Destroy Function](#411---destroy-function)
+        2. [Handling Trash](#412---handling-trash)
+        3. [Detecting Destruction](#413---detecting-destruction)
+        4. [Cleanup Example(s)](#414---cleanup-examples)
 
 <br><br>
 
-<a name="what-is-classify"/>
 # **1 - What is Classify?**
 **Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
