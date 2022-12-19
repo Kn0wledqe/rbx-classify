@@ -18,6 +18,7 @@
 
 <br><br>
 
+<a name="what-is-classify"/>
 # **1 - What is Classify?**
 **Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
