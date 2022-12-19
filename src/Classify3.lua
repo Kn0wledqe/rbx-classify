@@ -308,7 +308,7 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any)
 	end
 
 	for key, value in super do
-		if key == "_onDestroy" then
+		if key == "_onDestroy" or key == "new" then
 			continue
 		end
 
