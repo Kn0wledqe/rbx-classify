@@ -1,9 +1,20 @@
 # Table of Contents
-1. [What is Classify](#what-is-classify) - *A short explanation of Classify's purpose*
-2. [Getting Started](#getting-started) - *Getting Classify installed into your project*
-    1. [Get the Source Code](#get-the-source-code) - *Where to find the latest release*
-    2. [Install Into Your Project](#install-into-your-project) - *How and where to install the module*
-    3. [Load the Module](#load-the-module) - *How to require the module*
+**Click on any of the links below to quick jump to a section:**
+1. [What is Classify](#what-is-classify)
+2. [Getting Started](#getting-started)
+    1. [Geting the Source Code](#geting-the-source-code)
+    2. [Installing Into Your Project](#installing-into-your-project)
+    3. [Loading the Module](#loading-the-module)
+3. [Introductory Guide](#introductory-guide)
+    1. [Creating a Class](#creating-a-class)
+    2. [Using the Class](#using-the-class)
+    3. [Creating a Basic Custom Property](#creating-a-basic-custom-property)
+4. [Advanced Guide & Documentation](#advanced-guide--documentation)
+    1. [Destroying & Class Cleanup](#destroying--class-cleanup)
+        1. [Destroy Function](#destroy-function)
+        2. [Handling Trash](#handling-trash)
+        3. [Detecting Destruction](#detecting-destruction)
+        4. [Cleanup Example(s)](#cleanup-examples)
 
 <br><br>
 
@@ -11,43 +22,44 @@
 **Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
 It is highly recommended that you have a moderate-level understanding of the following before bringing Classify into your project:
-- What Lua metatables are and how they work.
-    - Specifically, the `__index` and `__newindex` metamethods.
+- What Lua metatables are and how they work. Specifically, the `__index` and `__newindex` metamethods.
 - What Object-Oriented Programming actually means and when to use it.
 - How to write performant, memory-respecting code.
-<br><br>
+
+<br><br><br>
 
 # Getting Started
-## Get the Source Code
+## Getting the Source Code
 You can fetch the latest release of Classify from the following sources:
 - The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.
 - By directly copying the [latest source code file] from the main branch.
 <br><br>
 
-## Install Into Your Project
-The Classify module is a single source file that is placed into a `ModuleScript` anywhere in your project hierarchy. **NOTE:** I recommend keeping it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
+## Installing Into Your Project
+The Classify module is a single source file that is placed into a `ModuleScript` anywhere in your project hierarchy.
+
+**NOTE:** I recommend keeping it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
 <br><br>
 
-## Load the Module
-Once you have the source code where you want it, you'll simply require it like you would any other ModuleScript:
+## Loading the Module
+Once you've installed classify into your project, all you'll need to do is require it like any other ModuleScript.
 
 ```lua
-local classify = require(path.to.Classify)
+local Classify = require(path.to.Classify)
 ```
+<br><br><br>
 
-# Using Classify - Quick Start Guide
-If you just want to quickly create a custom class without worrying about all the extra functionality that Classify provides you, this short quick start guide will show you how to do just that.
-
-## Creating a Simple Class
-Once you've required Classify, you'll need to get your class code laid out:
+# Introductory Guide
+## Creating a Class
+Creating a class with Classify requires one simple function call:
 
 ```lua
--- Your Class Script
-local MyClass = { }
-MyClass.__classname = "MyNewClass" -- this is REQUIRED for Classify to accept your code
+-- MyClass.lua
+local MyClass = {}
+local Classify = require(path.to.Classify)
 
 function MyClass.new()
-    local self = classify(MyClass)
+    local self = Classify(MyClass)
     return self
 end
 
@@ -57,72 +69,154 @@ end
 
 return MyClass
 ```
+<br>
 
-Sweet! You now have the bare-minimum required to start programming your brand new class!
-
-## Using Your Class
-Now let's test it out our new class with another simple script:
+## Using the Class
+Now you can require your class and create it with the `.new()` constructor:
 
 ```lua
--- Testing Script
+-- Example.lua
 local MyClass = require(path.to.MyClass)
 
 local Test = MyClass.new()
-Test:SayHello() -- should output "Hello, world!"
+Test:SayHello() --> "Hello, world!"
+```
+<br>
+
+## Creating a Basic Custom Property
+Classify implements a custom property manager that directs reads and writes (gets and sets) to your class through property-specific functions called **handlers**.
+
+In order to create a custom property, your main class table must have a `__properties` table. This table holds all property keys and their respective get/set handlers:
+```lua
+MyClass.__properties = {
+    -- the key of table is the name of the property
+    CustomPropertyName = {
+        -- all get/set handlers go in here
+        get = function(self)
+            return self._foo
+        end,
+        set = function(self, bar: any)
+            self._foo = bar
+        end
+    }
+}
+```
+Now we can create and use a custom `Name` property for our `MyClass` class:
+
+```lua
+-- MyClass.lua
+local MyClass = {}
+local Classify = require(path.to.Classify)
+
+function MyClass.new()
+    local self = Classify(MyClass)
+
+    self._name = "MyClass"
+
+    return self
+end
+
+function MyClass:SayHello()
+    print("Hello, world!")
+end
+
+MyClass.__properties ={
+    Name = {
+        get = function(self)
+            return self._name
+        end,
+        set = function(self, value: string)
+            self._name = value
+        end
+    }
+}
+
+return MyClass
+```
+```lua
+-- Example.lua
+local MyClass = require(path.to.MyClass)
+
+local Test = MyClass.new()
+Test:SayHello() --> "Hello, world!"
+
+print(Test.Name) --> "MyClass"
+
+Test.Name = "Foo"
+
+print(Test.Name) --> "Foo"
+```
+<br><br><br>
+
+# Advanced Guide & Documentation
+Everything below will cover all advanced features and nuances of Classify. It is strongly recommend that you have a higher level understanding of OOP in Luau before diving in to this documentation.
+<br><br>
+
+## Destroying & Class Cleanup
+### Destroy Function
+Any wrapped class will automatically have a `::Destroy(...)` function injected into its class table. This function acts similar to `Instance:Destroy()` in that all class data is cleared from memory, and any read or write operations that occur afterwards will cause an error.
+
+**NOTE 1:** It is important to remember that `::Destroy(...)` will also call `::Destroy()` on any instances that are referenced in the class table, as well as any instances that are [marked as trash](#handling-trash). It will also disconnect any `RBXScriptSignals` that are referenced (it's basically a Maid that iterates over `self`).
+
+**NOTE 2:** Any arguments passed through `::Destroy(...)` will be sent to the [`::_onDestroy(...)`](#detecting-destruction) callback.
+<br><br>
+
+### Handling Trash
+In some cases, you may want to mark an instance for destruction that isn't already referenced in your class table. To do so, make use of the injected `::_markTrash(any|{any})` function. Any instance, RBXScriptSignal, or table (with a function called "Destroy") will be cleaned up when `::Destroy(...)` is called.
+
+**NOTE 1:** `::_markTrash(any|{any})` will accept a single item *or* a table of items. It is NOT a variadic.
+
+**NOTE 2:** You cannot remove an item from the trash list after it has been added.
+<br><br>
+
+### Detecting Destruction
+You can optionally detect the destruction of your class by adding a function to your class table called `::_onDestroy(...)`.
+
+**NOTE 1:** This function is blocking and will be called before Classify clears and locks class data.
+
+**NOTE 2:** Any arguments passed to `::Destroy(...)` will be forwarded to this callback.
+<br><br>
+
+### Cleanup Example(s)
+```lua
+-- MyClass.lua
+function MyClass.new()
+    local self = Classify(MyClass)
+
+    self._button = Instance.new("TextButton")
+
+    return self
+end
+
+function MyClass:_onDestroy(...)
+    -- this will print out any arguments passed
+    -- then wait 3 seconds before actually destroying
+    print("Destroy arguments:", ...)
+    task.wait(3)
+end
+```
+```lua
+-- Example.lua
+local Test = MyClass.new()
+Test:Destroy("foo") --> Destroy arguments: foo
+print("All gone!") --> All gone! (after 3 seconds have passed)
 ```
 
-If you see "Hello, world!" in the output: congratulations! You've successfully set up and tested a basic class module.
+<br><br><br>
+=
+<br><br><br>
+## **THE BELOW DOCUMENTATION IS OUTDATED AND DOES NOT WORK. IT IS CURRENTLY BEING REWRITTEN. DO NOT USE!!!!**
+<br><br><br>
+=
 
 # Using Classify - Advanced
-For more advanced users who want to fully take advantage of Classify's unique features and built-in aids.
-
-## Reserved Members & Functions
-Classify will always reserve some members and functions in your main class table. These are extensions that the module adds for both your and Classify's internal use. Attempting to modify or overwrite these members will cause unpredictable (likely erroneous) behavior. They are as follows:
-
-### Members
-| Member | Description |
-|--|--|
-| `__classname` | Read-only. Mandatory class name identifier that must be specified for Classify to work. |
-| `ClassName`  | Read-only. Built-in property that returns the `__classname` data you specified. |
-| `__properties` | Internal table of properties that Classify reads to bind your custom properties. |
-
 ### Functions
 | Function & Aliases  | Description |
 |--|--|
-| `::Destroy(...)` | A pre-built all-encompassing destroy method that tells Classify to call your optionally-assigned `::__cleaning()` callback with any arguments supplied to `::Destroy()`, clean up all class memory, dispose of marked instances, and lock the metatable of your class. |
-| `::__cleaning(...)`  | An optional yielding callback that is ran by Classify when `::Destroy()` is called on your class. Any arguments passed through `::Destroy()` are passed through. |
-| `::_clean()` | Internal function called by the built-in `::Destroy()` method that cleans up all class memory. You shouldn't need this. |
-| `::_dispose()`  | Internal function called by the built-in `::Destroy()` method that cleans up marked trash. You shouldn't need this. |
-| `::_markTrash(Instance)` `::_markTrash({})` | Marks a table or (with a `::Destroy()` method), Instance, RBXScriptSignal, or Function as a disposable set of data. Also works with a list of those as well. |
 | `::_inherit(class)` | Copies inheritable data from another class onto the current one. |
 | `::_redirectNullProperties(Instance)` | Redirects null custom properties to the target instance. Essentially like importing an object's properties into your class. |
 | `::__inherited(childClass)` | An optional yielding callback that is ran by Classify when the class is inherited. It passes the child class data in case you need to do any mandatory processing for the inheritance to work correctly. |
 | `::GetPropertyChangedSignal(property)` | Creates and returns an RBXScriptSignal that fires (with the target value) when the specified property changes. |
-
-## Handling Cleanup
-Classify will automatically handle the cleanup of class memory when `::Destroy()` is called. However, Classify does *not* destroy Roblox instances that are created by your class or stored in its memory. To get around this, Classify exposes two functions that allow you to mark them as "trash": `::_markTrash(...)` - both of which are documented under the **Reserved Members & Functions** section above.
-
-It accepts the same argument types as a standard Maid: any table with a `::Destroy()` method, a Roblox Instance, RBXScriptSignal, or function. Example:
-
-```lua
-function MyClass.new()
-    local self =  classify(MyClass)
-    
-    local button =  Instance.new("TextButton")
-    
-    self:_markTrash(button) -- this button will now be destroyed when the class is destroyed
-    
-    return  self
-end
-```
-
-You can also bind a callback to intercept when your class is destroyed called `::__cleaning(...)`. This callback will yield the destruction and cleanup process until it finishes execution. It is also the first step in the cleanup chain, so you can still access class memory and marked trash. Example:
-
-```lua
-function MyClass:__cleaning(...)
-    print("::Destroy() was called on MyClass! The following arguments were passed:" ...)
-end
-```
 
 ## Inheritance
 Classify has a very simple and high-level inheritance system that allows you quickly import functions and properties from other Classify-processed classes.
@@ -247,9 +341,9 @@ An internal bind is simply a quick and easy way to reference internal class data
 -- In your class script
 function MyClass.new()
     local self = classify(MyClass)
-    
+
     self._test = "Hello, world!"
-    
+
     return self
 end
 
@@ -293,10 +387,10 @@ local TextService = game:GetService("TextService")
 
 function MyClass.new()
     local self = classify(MyClass)
-    
+
     self._text = ""
     self._button = Instance.new("TextButton")
-    
+
     return self
 end
 
