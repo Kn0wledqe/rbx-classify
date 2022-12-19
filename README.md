@@ -1,4 +1,4 @@
-# Table of Contents
+# **Table of Contents**
 **Click on any of the links below to quick jump to a section:**
 1. [What is Classify](#what-is-classify)
 2. [Getting Started](#getting-started)
@@ -18,7 +18,7 @@
 
 <br><br>
 
-# What is Classify?
+# **1 - What is Classify?**
 **Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
 It is highly recommended that you have a moderate-level understanding of the following before bringing Classify into your project:
@@ -28,20 +28,20 @@ It is highly recommended that you have a moderate-level understanding of the fol
 
 <br><br>
 
-# Getting Started
-## Getting the Source Code
+# **2 - Getting Started**
+## 2.1 - Getting the Source Code
 You can fetch the latest release of Classify from the following sources:
 - The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.
 - By directly copying the [latest source code file] from the main branch.
 <br><br>
 
-## Installing Into Your Project
+## 2.2 - Installing Into Your Project
 The Classify module is a single source file that is placed into a `ModuleScript` anywhere in your project hierarchy.
 
 **NOTE:** I recommend keeping it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
 <br><br>
 
-## Loading the Module
+## 2.3 - Loading the Module
 Once you've installed classify into your project, all you'll need to do is require it like any other ModuleScript.
 
 ```lua
@@ -49,8 +49,8 @@ local Classify = require(path.to.Classify)
 ```
 <br><br>
 
-# Introductory Guide
-## Creating a Class
+# **3 - Introductory Guide**
+## 3.1 - Creating a Class
 Creating a class with Classify requires one simple function call:
 
 ```lua
@@ -71,7 +71,7 @@ return MyClass
 ```
 <br>
 
-## Using the Class
+## 3.2 - Using the Class
 Now you can require your class and create it with the `.new()` constructor:
 
 ```lua
@@ -83,7 +83,7 @@ Test:SayHello() --> "Hello, world!"
 ```
 <br>
 
-## Creating a Basic Custom Property
+## 3.3 - Creating a Basic Custom Property
 Classify implements a custom property manager that directs reads and writes (gets and sets) to your class through property-specific functions called **handlers**.
 
 In order to create a custom property, your main class table must have a `__properties` table. This table holds all property keys and their respective get/set handlers:
@@ -148,12 +148,12 @@ print(Test.Name) --> "Foo"
 ```
 <br><br>
 
-# Advanced Guide & Documentation
+# 4 - **Advanced Guide & Documentation**
 Everything below will cover all advanced features and nuances of Classify. It is strongly recommend that you have a higher level understanding of OOP in Luau before diving in to this documentation.
 <br><br>
 
-## Destroying & Class Cleanup
-### Destroy Function
+## 4.1 - Destroying & Class Cleanup
+### 4.1.1 - Destroy Function
 Any wrapped class will automatically have a `::Destroy(...)` function injected into its class table. This function acts similar to `Instance:Destroy()` in that all class data is cleared from memory, and any read or write operations that occur afterwards will cause an error.
 
 **NOTE 1:** It is important to remember that `::Destroy(...)` will also call `::Destroy()` on any instances that are referenced in the class table, as well as any instances that are [marked as trash](#handling-trash). It will also disconnect any `RBXScriptSignals` that are referenced (it's basically a Maid that iterates over `self`).
@@ -161,7 +161,7 @@ Any wrapped class will automatically have a `::Destroy(...)` function injected i
 **NOTE 2:** Any arguments passed through `::Destroy(...)` will be sent to the [`::_onDestroy(...)`](#detecting-destruction) callback.
 <br><br>
 
-### Handling Trash
+### 4.1.2 - Handling Trash
 In some cases, you may want to mark an instance for destruction that isn't already referenced in your class table. To do so, make use of the injected `::_markTrash(any|{any})` function. Any instance, RBXScriptSignal, or table (with a function called "Destroy") will be cleaned up when `::Destroy(...)` is called.
 
 **NOTE 1:** `::_markTrash(any|{any})` will accept a single item *or* a table of items. It is NOT a variadic.
@@ -169,7 +169,7 @@ In some cases, you may want to mark an instance for destruction that isn't alrea
 **NOTE 2:** You cannot remove an item from the trash list after it has been added.
 <br><br>
 
-### Detecting Destruction
+### 4.1.3 - Detecting Destruction
 You can optionally detect the destruction of your class by adding a function to your class table called `::_onDestroy(...)`.
 
 **NOTE 1:** This function is blocking and will be called before Classify clears and locks class data.
@@ -177,7 +177,7 @@ You can optionally detect the destruction of your class by adding a function to 
 **NOTE 2:** Any arguments passed to `::Destroy(...)` will be forwarded to this callback.
 <br><br>
 
-### Cleanup Example(s)
+### 4.1.4 - Cleanup Example(s)
 ```lua
 -- MyClass.lua
 function MyClass.new()
