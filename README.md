@@ -34,7 +34,7 @@ It is **highly recommended** that you have a high-level understanding of the fol
 
 <br>
 
-### **!! READ:** Please understand that Classify is designed to *fully replace* your project's existing OOP paradigm, rather than simply compliment it. If you use Classify for some components while not using it for others - and decide to mix them together - you essentially risk signing yourself up for one gnarly headache. You've been warned!
+**!! READ:** Please understand that Classify is designed to *fully replace* your project's existing OOP paradigm, rather than simply compliment it. If you use Classify for some components while not using it for others - and decide to mix them together - you essentially risk signing yourself up for one gnarly headache. You've been warned!
 
 <br><br>
 
