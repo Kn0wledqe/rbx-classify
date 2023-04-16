@@ -13,13 +13,19 @@
     1. [Destroying & Class Cleanup](#41---destroying--class-cleanup)
         1. [Destroy Function](#411---destroy-function)
         2. [Handling Trash](#412---handling-trash)
-        3. [Detecting Destruction](#413---detecting-destruction)
-        4. [Cleanup Example(s)](#414---cleanup-examples)
+        3. [Intercepting Destruction](#413---intercepting-destruction)
+        4. [Handling Destroyed Classes](#414---handling-destroyed-classes)
+        5. [Protecting Keys](#415---protecting-keys)
+    2. [Inheritance](#42---inheritance)
+        1. [Important Notes Before Continuing](#421---important-notes-before-continuing)
+        2. [Creating Child & Super Classes](#422---creating-child--super-classes)
+        3. [Inheriting a Class](#423---inheriting-a-class)
+
 
 <br><br>
 
 # **1 - What is Classify?**
-**Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau langauge. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
+**Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau language. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
 It is highly recommended that you have a moderate-level understanding of the following before bringing Classify into your project:
 - What Lua metatables are and how they work. Specifically, the `__index` and `__newindex` metamethods.
@@ -31,14 +37,14 @@ It is highly recommended that you have a moderate-level understanding of the fol
 # **2 - Getting Started**
 ## 2.1 - Getting the Source Code
 You can fetch the latest release of Classify from the following sources:
-- The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.
-- By directly copying the [latest source code file] from the main branch.
+- ~~The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.~~ (not done)
+- Directly copying the [latest source code file](https://github.com/doctr-oof/rbx-classify/blob/main/src/Classify3.lua) from the main branch.
 <br><br>
 
 ## 2.2 - Installing Into Your Project
 The Classify module is a single source file that is placed into a `ModuleScript` anywhere in your project hierarchy.
 
-**NOTE:** I recommend keeping it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
+**NOTE:** It's recommended that you place it somewhere in `ReplicatedStorage` so both the server and the client have access to the module.
 <br><br>
 
 ## 2.3 - Loading the Module
@@ -95,7 +101,7 @@ MyClass.__properties = {
         get = function(self)
             return self._foo
         end,
-        set = function(self, bar: any)
+        set = function(self, bar)
             self._foo = bar
         end
     }
@@ -125,7 +131,7 @@ MyClass.__properties ={
         get = function(self)
             return self._name
         end,
-        set = function(self, value: string)
+        set = function(self, value)
             self._name = value
         end
     }
@@ -149,35 +155,32 @@ print(Test.Name) --> "Foo"
 <br><br>
 
 # 4 - **Advanced Guide & Documentation**
-Everything below will cover all advanced features and nuances of Classify. It is strongly recommend that you have a higher level understanding of OOP in Luau before diving in to this documentation.
-<br><br>
-
 ## 4.1 - Destroying & Class Cleanup
 ### 4.1.1 - Destroy Function
 Any wrapped class will automatically have a `::Destroy(...)` function injected into its class table. This function acts similar to `Instance:Destroy()` in that all class data is cleared from memory, and any read or write operations that occur afterwards will cause an error.
 
-**NOTE 1:** It is important to remember that `::Destroy(...)` will also call `::Destroy()` on any instances that are referenced in the class table, as well as any instances that are [marked as trash](#handling-trash). It will also disconnect any `RBXScriptSignals` that are referenced (it's basically a Maid that iterates over `self`).
+**NOTE 1:** It is important to remember that `::Destroy(...)` will also call `::Destroy()` on any instances that are referenced in the class table, as well as any instances that are [marked as trash](#412---handling-trash). It will also disconnect any `RBXScriptSignal` that is referenced (it's basically a Maid that iterates over `self`). If there are keys that you don't want destroyed, you can utilize [key protection](#415---protecting-keys).
 
-**NOTE 2:** Any arguments passed through `::Destroy(...)` will be sent to the [`::_onDestroy(...)`](#detecting-destruction) callback.
+**NOTE 2:** Any arguments passed through `::Destroy(...)` will be sent to the [`::_onDestroy(...)`](#413---intercepting-destruction) callback.
 <br><br>
 
 ### 4.1.2 - Handling Trash
-In some cases, you may want to mark an instance for destruction that isn't already referenced in your class table. To do so, make use of the injected `::_markTrash(any|{any})` function. Any instance, RBXScriptSignal, or table (with a function called "Destroy") will be cleaned up when `::Destroy(...)` is called.
+In some cases, you may want to mark an instance or signal for destruction that isn't already referenced in your class table. To do so, make use of the injected `::_markTrash(any|{any})` method. Any instance, `RBXScriptSignal`, or table (with a function called "Destroy") will be cleaned up when `::Destroy(...)` is called.
 
 **NOTE 1:** `::_markTrash(any|{any})` will accept a single item *or* a table of items. It is NOT a variadic.
 
 **NOTE 2:** You cannot remove an item from the trash list after it has been added.
 <br><br>
 
-### 4.1.3 - Detecting Destruction
+### 4.1.3 - Intercepting Destruction
 You can optionally detect the destruction of your class by adding a function to your class table called `::_onDestroy(...)`.
 
-**NOTE 1:** This function is blocking and will be called before Classify clears and locks class data.
+**NOTE 1:** This function is blocking and will be called *before* Classify clears and locks class data.
 
 **NOTE 2:** Any arguments passed to `::Destroy(...)` will be forwarded to this callback.
 <br><br>
 
-### 4.1.4 - Cleanup Example(s)
+Here is an example of the `::_onDestroy(...)` callback:
 ```lua
 -- MyClass.lua
 function MyClass.new()
@@ -189,8 +192,8 @@ function MyClass.new()
 end
 
 function MyClass:_onDestroy(...)
-    -- this will print out any arguments passed
-    -- then wait 3 seconds before actually destroying
+    -- This will print out any arguments passed then
+    -- wait 3 seconds before actually destroying.
     print("Destroy arguments:", ...)
     task.wait(3)
 end
@@ -201,16 +204,211 @@ local Test = MyClass.new()
 Test:Destroy("foo") --> Destroy arguments: foo
 print("All gone!") --> All gone! (after 3 seconds have passed)
 ```
+<br>
+
+### 4.1.4 - Handling Destroyed Classes
+Since Classify classes are basically fancy tables and not actual userdatas, destroying one does not release/nullify hard references to it. This phenomenon can lead to unexpected behavior when using truthy/falsey/nil logic checks. For example, notice how the destroyed class below passes the conditional check and creates an erroneous condition:
+```lua
+local Test = MyClass.new()
+Test:Destroy()
+
+if Test then
+    -- This will error because ::SayHello() was removed and
+    -- the class table was frozen.
+    Test:SayHello()
+end
+```
+
+Thankfully, both Luau and Classify offer a workaround: `table.isfrozen(t)` and/or the `Destroyed` key, which always returns `true` if the class table was cleared and frozen:
+```lua
+local Test = MyClass.new()
+Test:Destroy()
+
+-- Alternatively you can use table.isfrozen(Test)
+if not Test.Destroyed then
+    Test:SayHello()
+end
+```
+<br>
+
+### 4.1.5 - Protecting Keys
+For backwards compatibility, Classify 3.0 and later has a newly-injected `::_protect(key)` method. This function - when called with the name of the key to protect - will ensure the Classify does not automatically destroy/disconnect any instance/`RBXScriptSignals` associated with that key.
+
+**NOTE 1:** This method should only be used for upgrading classes that use versions of Classify older than 3.0 in cases where restructuring isn't an option.
+
+**NOTE 2:** Continuous use of this method can promote memory leaks due to unreleased hard references. It is strongly recommended to structure your class code in an alternate manner if you find yourself relying on this method often.
+
+```lua
+-- Memory-unsafe, but valid use:
+function MyClass.new()
+    local self = Classify(MyClass)
+
+    self.partToKeep = Instance.new("Part")
+    self:_protect("partToKeep")
+
+    return self
+end
+```
+```lua
+-- Not as pretty, but much more memory-safe alternative:
+function MyClass.new()
+    local self = Classify(MyClass)
+
+    -- Since class keys are simply nullified on destroy, object references
+    -- within a table will not be targeted for destruction.
+    self._objects = {}
+    self._objects.partToKeep = Instance.new("Part")
+
+    return self
+end
+```
+<br>
+
+## 4.2 - Inheritance
+Classify provides a high-level inheritance system that aims to streamline development in projects by reducing the need to rewrite duplicate code to accomplish the same result across multiple similar components.
+
+### 4.2.1 - Important Notes Before Continuing
+- While Classify 3.0 and later supports the ability to inherit non-Classify-wrapped classes, you should note that the child class's (the inheriting module) metatable will always take precedent over the super class's (the inherited module) data. This means that custom implementations of `__newindex`, `__index`, etc. will not carry over to the child class.
+- In fact, it is strongly recommended that you convert any third-party class modules to use Classify if able. Doing so will always guarantee a successful and predictable inheritance result.
+- If both the child and super class have an `::_onDestroy(...)` callback, the child's callback will always run before the super's.
+- Any class module (Classify-wrapped or otherwise) must have a `.new()` constructor to be inherited. The absence of a constructor will throw an error.
+<br><br>
+
+### 4.2.2 - Creating Child & Super Classes
+There is no internal distinction between a "child" class and a "super" class with Classify. The only real distinction is in which module inherits the other one (e.g. ModuleA inherits ModuleB, which makes ModuleB the "super" class).
+
+With that in mind, we'll differentiate all below examples by referring to one module as "SuperClass", and the other as "ChildClass" for ease of understanding.
+
+```lua
+-- SuperClass.lua
+local SuperClass = {}
+
+function SuperClass.new()
+    return Classify(SuperClass)
+end
+
+function SuperClass:SayHello()
+    print("Hello, world!")
+end
+
+SuperClass.__properties = {
+    SuperProperty = {
+        get = function()
+            return "SuperClass Property!"
+        end,
+    },
+}
+
+return SuperClass
+```
+```lua
+-- ChildClass.lua
+local ChildClass = {}
+
+function ChildClass.new()
+    local self = Classify(ChildClass)
+    return self
+end
+
+ChildClass.__properties = {
+    ChildProperty = {
+        get = function()
+            return "ChildClass Property!"
+        end,
+    },
+}
+
+return ChildClass
+```
+<br>
+
+### 4.2.3 - Inheriting a Class
+The `::_inherit(superClass, overwriteChild?, ...?)` function can be called at any point in time in your child class. This function will cause all methods, private and public members, and custom properties of the super class to copied over to yours. The optional `::_onInherit(childClass, ...?)` callback also gives the allows the super class to intercept and perform additional processing on the inheriting child class.
+
+**NOTE 1:** Duplicate keys (e.g. methods or properties with the same name) cannot be inherited and will be discarded from the super class unless `overwriteChild` is `true`; in which case, the reverse will happen and the super class data will take precedent.
+
+**NOTE 2:** All data passed through `::_inherit()` after `overwriteChild` will be passed to `::_onInherit()` if it exists.
+
+```lua
+-- SuperClass.lua
+local SuperClass = {}
+
+function SuperClass.new()
+    return Classify(SuperClass)
+end
+
+function SuperClass:SayHello()
+    print("Hello, world!")
+end
+
+function SuperClass:_onInherit(child)
+    -- This will insert a new key into the child class table
+    -- that can be accessed later.
+    child._foo = "bar"
+end
+
+SuperClass.__properties = {
+    SuperProperty = {
+        get = function()
+            return "SuperClass Property!"
+        end,
+    },
+}
+
+return SuperClass
+```
+```lua
+-- ChildClass.lua
+local ChildClass = {}
+
+function ChildClass.new()
+    local self = Classify(ChildClass)
+    self:_inherit(SuperClass)
+    return self
+end
+
+ChildClass.__properties = {
+    ChildProperty = {
+        get = function()
+            return "ChildClass Property!"
+        end,
+    },
+}
+
+return ChildClass
+```
+```lua
+-- Example.lua
+local ChildTest = ChildClass.new()
+
+-- Since ChildClass inherits SuperClass, we not have access
+-- to SuperClass's methods and properties as if they were
+-- a part of ChildClass!
+ChildTest:SayHello() --> Hello, world!
+print(ChildTest.SuperProperty) --> SuperClass Property!
+
+-- Members of ChildClass remain untouched and still usable.
+print(ChildTest.ChildProperty) --> ChildClass Property!
+```
+
 
 <br><br><br>
 =
 <br><br><br>
-## **THE BELOW DOCUMENTATION IS OUTDATED AND DOES NOT WORK. IT IS CURRENTLY BEING REWRITTEN. DO NOT USE!!!!**
+## **THE BELOW DOCUMENTATION IS OUTDATED AND IS CURRENTLY BEING REWRITTEN. USE IS STRONGLY ILL-ADVISED!**
 <br><br><br>
 =
 
-# Using Classify - Advanced
-### Functions
+
+
+
+
+
+
+
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 | Function & Aliases  | Description |
 |--|--|
 | `::_inherit(class)` | Copies inheritable data from another class onto the current one. |
