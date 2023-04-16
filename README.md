@@ -1,5 +1,5 @@
 # **Table of Contents**
-**Click on any of the links below to quick jump to a section:**
+**Click on any of the links below to quickly jump to a section:**
 1. [What is Classify](#1---what-is-classify)
 2. [Getting Started](#2---getting-started)
     1. [Geting the Source Code](#21---getting-the-source-code)
@@ -25,19 +25,23 @@
 <br><br>
 
 # **1 - What is Classify?**
-**Classify** is a single-function OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau language. Classify aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
+**Classify** is an opinionated OOP wrapper that facilitates and streamlines the creation of classes in Roblox's Luau language. It aims to reduce the required code lift from the developer by implementing custom property handlers, inheritance, and memory cleanup - all without adding excess overhead into your code.
 
-It is highly recommended that you have a moderate-level understanding of the following before bringing Classify into your project:
-- What Lua metatables are and how they work. Specifically, the `__index` and `__newindex` metamethods.
-- What Object-Oriented Programming actually means and when to use it.
-- How to write performant, memory-respecting code.
+It is **highly recommended** that you have a high-level understanding of the following before using Classify in your project:
+- What Lua metatables are and how they work. If you're not familiar with them, you're going to have a bad time.
+- What Object-Oriented Programming actually means and when to use it (as well as when *not* to use it).
+- How to write performant and memory-safe code; as well as have a basic understanding of Luau's garbage collection (e.g. knowing what a "hard reference" is).
+
+<br>
+
+### **!! READ:** Please understand that Classify is designed to *fully replace* your project's existing OOP paradigm, rather than simply compliment it. If you use Classify for some components while not using it for others - and decide to mix them together - you essentially risk signing yourself up for one gnarly headache. You've been warned!
 
 <br><br>
 
 # **2 - Getting Started**
 ## 2.1 - Getting the Source Code
 You can fetch the latest release of Classify from the following sources:
-- ~~The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of the repository.~~ (not done)
+- ~~The [releases page](https://github.com/doctr-oof/rbx-classify/releases) of this repository.~~ (not done)
 - Directly copying the [latest source code file](https://github.com/doctr-oof/rbx-classify/blob/main/src/Classify3.lua) from the main branch.
 <br><br>
 
@@ -395,7 +399,7 @@ print(ChildTest.ChildProperty) --> ChildClass Property!
 <br><br><br>
 =
 <br><br><br>
-## **THE BELOW DOCUMENTATION IS OUTDATED AND IS CURRENTLY BEING REWRITTEN. USE IS STRONGLY ILL-ADVISED!**
+## **THE BELOW DOCUMENTATION IS OUTDATED AND IS CURRENTLY BEING REWRITTEN. *USE IS STRONGLY ILL-ADVISED!***
 <br><br><br>
 =
 
