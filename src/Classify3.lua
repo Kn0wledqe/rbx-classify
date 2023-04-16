@@ -2,6 +2,7 @@
 	File: Classify.lua
 	Author(s): Eric Karolchyk
 	Created: 11/25/2022 @ 19:42:53
+	Version: 3.2.0
 
 	Description:
 		Provides a simple-to-use OOP class wrapper to easily create
@@ -9,7 +10,8 @@
 		and more!
 
 	Documentation:
-		Documentation pending.
+		Documentation can be found in the official doctr-oof/rbx-classify
+		repository.
 --]]
 
 --[ Internal Functions ]--
@@ -40,6 +42,10 @@ local Classify = { meta = {}, prototype = {} }
 
 --[ Classify Metamethods ]--
 function Classify.meta.__index(self: {}, key: string): any
+	if key == "Destroyed" then
+		return table.isfrozen(self)
+	end
+
 	if table.isfrozen(self) then
 		error(("attempt to index nil with '%s'"):format(key), 2)
 		return nil
@@ -64,58 +70,62 @@ function Classify.meta.__index(self: {}, key: string): any
 		local handler = properties[key]
 
 		if handler then
-			-- i don't feel like re-typing these...
-			local read = handler.onRead
-			local get = handler.get
-			local bind = handler.bind
-			local target = handler.target
-			local internal = handler.internal
-			local bindTarget = handler.bindTarget
+			if type(handler) == "string" then
+				return rawget(self, handler)
+			else
+				-- i don't feel like re-typing these...
+				local read = handler.onRead
+				local get = handler.get
+				local bind = handler.bind
+				local target = handler.target
+				local internal = handler.internal
+				local bindTarget = handler.bindTarget
 
-			-- the read get handler is the only one that can be combined
-			-- with the others
-			if read then
-				read(self)
-			end
-
-			-- the rest of the get handlers must be mutually exclusive
-			if get then
-				return get(self)
-			elseif bindTarget then
-				if type(bindTarget) == "string" then
-					local targetKey = rawget(self, bindTarget)
-
-					if targetKey then
-						return targetKey[key]
-					end
-				elseif type(bindTarget) == "function" then
-					return bindTarget(self)[key]
-				end
-			elseif bind and target then
-				return target(self)[bind]
-			elseif internal then
-				local nodes = {}
-
-				for node in internal:gmatch("([^.]+)") do
-					table.insert(nodes, node)
+				-- the read get handler is the only one that can be combined
+				-- with the others
+				if read then
+					read(self)
 				end
 
-				if nodes and #nodes > 0 then
-					local result = self
+				-- the rest of the get handlers must be mutually exclusive
+				if get then
+					return get(self)
+				elseif bindTarget then
+					if type(bindTarget) == "string" then
+						local targetKey = rawget(self, bindTarget)
 
-					for _, node in ipairs(nodes) do
-						local step = rawget(result, node)
-
-						if step then
-							result = step
-						else
-							return nil
+						if targetKey then
+							return targetKey[key]
 						end
+					elseif type(bindTarget) == "function" then
+						return bindTarget(self)[key]
+					end
+				elseif bind and target then
+					return target(self)[bind]
+				elseif internal then
+					local nodes = {}
+
+					for node in internal:gmatch("([^.]+)") do
+						table.insert(nodes, node)
 					end
 
-					return result
-				else
-					return rawget(self, internal)
+					if nodes and #nodes > 0 then
+						local result = self
+
+						for _, node in ipairs(nodes) do
+							local step = rawget(result, node)
+
+							if step then
+								result = step
+							else
+								return nil
+							end
+						end
+
+						return result
+					else
+						return rawget(self, internal)
+					end
 				end
 			end
 		end
@@ -152,43 +162,48 @@ function Classify.meta.__newindex(self: {}, key: string, value: any)
 		local handler = properties[key]
 
 		if handler then
-			local write = handler.onWrite
-			local internal = handler.internal
-			local set = handler.set
-			local bind = handler.bind
-			local target = handler.target
-			local bindTarget = handler.bindTarget
-
-			if write then
-				write(self)
-			end
-
-			if internal then
-				rawset(self, internal, value)
+			if type(handler) == "string" then
+				rawset(self, handler, value)
 				success = true
-			end
+			else
+				local write = handler.onWrite
+				local internal = handler.internal
+				local set = handler.set
+				local bind = handler.bind
+				local target = handler.target
+				local bindTarget = handler.bindTarget
 
-			if set then
-				set(self, value)
-				success = true
-			end
+				if write then
+					write(self)
+				end
 
-			if bind and target then
-				target(self)[bind] = value
-				success = true
-			end
+				if internal then
+					rawset(self, internal, value)
+					success = true
+				end
 
-			if bindTarget then
-				if type(bindTarget) == "string" then
-					local targetKey = rawget(self, bindTarget)
+				if set then
+					set(self, value)
+					success = true
+				end
 
-					if targetKey then
-						targetKey[key] = value
+				if bind and target then
+					target(self)[bind] = value
+					success = true
+				end
+
+				if bindTarget then
+					if type(bindTarget) == "string" then
+						local targetKey = rawget(self, bindTarget)
+
+						if targetKey then
+							targetKey[key] = value
+							success = true
+						end
+					elseif type(bindTarget) == "function" then
+						bindTarget(self)[key] = value
 						success = true
 					end
-				elseif type(bindTarget) == "function" then
-					bindTarget(self)[key] = value
-					success = true
 				end
 			end
 		end
@@ -220,11 +235,11 @@ function Classify.meta.__newindex(self: {}, key: string, value: any)
 end
 
 function Classify.meta.__tostring(self: {}): string
-	if table.isfrozen(self) then
+	if not self or table.isfrozen(self) then
 		return "nil"
 	end
 
-	return self.Name or self.ClassName or nil
+	return self.Name or self.ClassName or "nil"
 end
 
 --[ Classify-injected Private Functions ]--
@@ -239,41 +254,37 @@ function Classify.prototype:_markTrash(trash: any)
 end
 
 function Classify.prototype:_redirectNullKeys(target: any)
+	if not self then return end
 	rawget(self, "__classify").NullTarget = target
 end
 
 -- the price to pay for kinda-clean output is apparently ugly code (i'm sorry)
 function Classify.prototype:_printClassData()
-	warn("--========= BEGIN CLASS DUMP =========--")
-	print("")
-	print("Class Table Keys:")
+	local resultStr = `{self.__classname or self.ClassName or "Class Data"}:\n  Keys:\n`
 
 	for key, value in self do
-		local prefix = " "
+		local prefix = ""
+		local typeStr = typeof(value)
+		local valueStr = type(value) ~= "function" and tostring(value) or ""
+		local typeLenDiff = 20 - #typeStr
+		local valueLenDiff = 30 - #key
+
+		if typeLenDiff <= 0 then typeLenDiff = 4 end
+		if valueLenDiff <= 0 then valueLenDiff = 4 end
 
 		if key:find("_") == 1 then
-			prefix ..= "private " .. typeof(value)
+			prefix ..= "private    " .. typeStr
 		else
-			prefix ..= "public " .. typeof(value)
+			prefix ..= "public     " .. typeStr
 		end
 
-		print(prefix, key, type(value) ~= "function" and value or "")
+		resultStr ..= `    {prefix .. string.rep(" ", typeLenDiff)}{key .. string.rep(" ", valueLenDiff)}{valueStr}\n`
 	end
 
-	print("")
-	print("Custom Properties:")
-
-	if rawget(self, "__properties") then
-		for propName, handlers in rawget(self, "__properties") do
-			print(" " .. propName, handlers)
-		end
-	end
-
-	print("")
-	warn("--========== END CLASS DUMP ==========--")
+	print(resultStr)
 end
 
-function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any)
+function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any): {any}
 	if not super.new then
 		error("Cannot inherit a class without a .new() constructor.", 2)
 		return
@@ -323,8 +334,10 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any)
 	table.insert(selfMeta.Trash, super)
 
 	if onInherit then
-		onInherit(self, ...)
+		onInherit(super, self, ...)
 	end
+
+	return self
 end
 
 function Classify.prototype:_protect(key: string)
@@ -393,6 +406,7 @@ function Classify.prototype:Destroy(...: any)
 		rawset(self, key, nil)
 	end
 
+	rawset(self, "Destroy", function() end)
 	table.freeze(self)
 	self = nil
 end
