@@ -30,7 +30,7 @@
 It is **highly recommended** that you have a high-level understanding of the following before using Classify in your project:
 - What Lua metatables are and how they work. If you're not familiar with them, you're going to have a bad time.
 - What Object-Oriented Programming actually means and when to use it (as well as when *not* to use it).
-- How to write performant and memory-safe code; as well as have a basic understanding of Luau's garbage collection (e.g. knowing what a "hard reference" is).
+- How to write performant and memory-safe code; as well as have a basic understanding of Luau's garbage collection (e.g. knowing what a "strong reference" is).
 
 <br>
 
