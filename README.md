@@ -275,7 +275,7 @@ Classify provides a high-level inheritance system that aims to streamline develo
 <br><br>
 
 ### 4.2.2 - Creating Child & Super Classes
-There is no internal distinction between a "child" class and a "super" class with Classify. The only real distinction is in which module inherits the other one (e.g. ModuleA inherits ModuleB, which makes ModuleB the "super" class).
+There is no internal distinction between a "child" class and a "super" class with Classify. The only real distinction is in which module inherits the other one (e.g. **ModuleA** inherits **ModuleB**, which makes **ModuleB** the "super" class).
 
 With that in mind, we'll differentiate all below examples by referring to one module as "SuperClass", and the other as "ChildClass" for ease of understanding.
 
