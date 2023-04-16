@@ -323,7 +323,7 @@ return ChildClass
 <br>
 
 ### 4.2.3 - Inheriting a Class
-The `::_inherit(superClass, overwriteChild?, ...?)` function can be called at any point in time in your child class. This function will cause all methods, private and public members, and custom properties of the super class to copied over to yours. The optional `::_onInherit(childClass, ...?)` callback also gives the allows the super class to intercept and perform additional processing on the inheriting child class.
+The `::_inherit(superClass, overwriteChild?, ...?)` function can be called anywhere in your child class. This function will cause all methods, private and public members, and custom properties of the super class to be copied over to yours. The optional `::_onInherit(childClass, ...?)` callback also allows the super class to intercept and perform additional processing on the inheriting child class.
 
 **NOTE 1:** Duplicate keys (e.g. methods or properties with the same name) cannot be inherited and will be discarded from the super class unless `overwriteChild` is `true`; in which case, the reverse will happen and the super class data will take precedent.
 
