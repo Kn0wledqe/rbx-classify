@@ -189,11 +189,11 @@ end
 <br>
 
 ### 4.1.5 - Protecting Keys
-For backwards compatibility, Classify 3.0 and later has a newly-injected `::_protect(key)` method. This function - when called with the name of the key to protect - will ensure the Classify does not automatically destroy/disconnect any instance/`RBXScriptSignals` associated with that key.
+For backwards compatibility, Classify 3.0 and later has a newly-injected `::_protect(key)` method. This function - when called with the name of the key to protect - will ensure that Classify does not automatically destroy/disconnect any instance/`RBXScriptSignals` associated with that key.
 
 **NOTE 1:** This method should only be used for upgrading classes that use versions of Classify older than 3.0 in cases where restructuring isn't an option.
 
-**NOTE 2:** Continuous use of this method can promote memory leaks due to unreleased hard references. It is strongly recommended to structure your class code in an alternate manner if you find yourself relying on this method often.
+**NOTE 2:** Continuous use of this method can promote memory leaks due to unreleased strong references. It is strongly recommended to structure your class code in an alternate manner if you find yourself relying on this method often.
 
 ```lua
 -- Memory-unsafe, but valid use:
