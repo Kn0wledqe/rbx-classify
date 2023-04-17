@@ -505,18 +505,16 @@ OR
   self: The owner class.
 ```
 ```lua
-MyProperty = {
-    Text = {
-        bindTarget = "someTextLabel",
-    }
+Text = {
+    bindTarget = "someTextLabel",
+}
 
-    -- OR:
+-- OR:
 
-    Text = {
-        bindTarget = function(self)
-            return self.someTextLabel
-        end,
-    }
+Text = {
+    bindTarget = function(self)
+        return self.someTextLabel
+    end,
 }
 ```
 <br>
