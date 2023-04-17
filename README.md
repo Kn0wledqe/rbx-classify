@@ -222,7 +222,7 @@ end
 <br>
 
 ## 4.2 - Inheritance
-Classify provides a high-level inheritance system that aims to streamline development in projects by reducing the need to rewrite duplicate code to accomplish the same result across multiple similar components.
+Classify provides a high-level inheritance system that aims to streamline development in projects by reducing the need to rewrite duplicate code to accomplish the same result across similar components.
 
 ### 4.2.1 - Important Notes Before Continuing
 - While Classify 3.0 and later supports the ability to inherit non-Classify-wrapped classes, you should note that the child class's (the inheriting module) metatable will always take precedent over the super class's (the inherited module) data. This means that custom implementations of `__newindex`, `__index`, etc. will not carry over to the child class.
@@ -296,12 +296,6 @@ end
 
 function SuperClass:SayHello()
     print("Hello, world!")
-end
-
-function SuperClass:_onInherit(child)
-    -- This will insert a new key into the child class table
-    -- that can be accessed later.
-    child._foo = "bar"
 end
 
 SuperClass.__properties = {
