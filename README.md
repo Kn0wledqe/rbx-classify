@@ -194,28 +194,12 @@ For backwards compatibility, Classify 3.0 and later has a newly-injected `::_pro
 
 **NOTE 1:** This method should only be used for upgrading classes that use versions of Classify older than 3.0 in cases where restructuring isn't an option.
 
-**NOTE 2:** Continuous use of this method can promote memory leaks due to unreleased strong references. It is strongly recommended to structure your class code in an alternate manner if you find yourself relying on this method often.
-
 ```lua
--- Memory-unsafe, but valid use:
 function MyClass.new()
     local self = Classify(MyClass)
 
     self.partToKeep = Instance.new("Part")
     self:_protect("partToKeep")
-
-    return self
-end
-```
-```lua
--- Not as pretty, but much more memory-safe alternative:
-function MyClass.new()
-    local self = Classify(MyClass)
-
-    -- Since class keys are simply nullified on destroy, object references
-    -- within a table will not be targeted for destruction.
-    self._objects = {}
-    self._objects.partToKeep = Instance.new("Part")
 
     return self
 end
