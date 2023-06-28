@@ -225,7 +225,7 @@ end
 ### 4.1.6 - Disabling Self-Cleaning
 In extremely rare circumstances, you may find it necessary to completely disable the self-cleaning functionality of Classify's injected `::Destroy()` method. Please understand that disabling this functionality can open up potentially serious memory leaks in classes that are frequently created and destroyed.
 
-**As such, you should not make a habit of disabling the self-cleaning feature. It's on by default for a reason!** Virtually all use cases for disabling self-cleaning stem from improper use of Classify or a lack of understanding OOP fundamentals. Consider rethinking your workflow if you find yourself utilizing this feature on any sort of frequent basis.
+**As such, you should not make it a habit of disabling the self-cleaning feature. It's on by default for a reason!** Virtually all use cases for disabling self-cleaning stem from improper use of Classify or a lack of understanding OOP fundamentals. Consider rethinking your workflow if you find yourself utilizing this feature on any sort of frequent basis.
 
 If you still insist on disabling self-cleaning, simply set `SelfCleaningEnabled` to `false` in your constructor:
 ```lua
