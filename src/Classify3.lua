@@ -14,6 +14,9 @@
 		repository.
 --]]
 
+--[ Root Table ]--
+local Classify = { meta = {}, prototype = {} }
+
 --[ Internal Functions ]--
 local function deepCopy(source: any, target: any): any
 	local result = {}
@@ -37,9 +40,6 @@ local function deepCopy(source: any, target: any): any
 	end
 end
 
---[ Root Table ]--
-local Classify = { meta = {}, prototype = {} }
-
 --[ Classify Metamethods ]--
 function Classify.meta.__index(self: {}, key: string): any
 	if key == "Destroyed" then
@@ -49,6 +49,10 @@ function Classify.meta.__index(self: {}, key: string): any
 	if table.isfrozen(self) then
 		error(("attempt to index nil with '%s'"):format(key), 2)
 		return nil
+	end
+
+	if key == "SelfCleanEnabled" then
+		return rawget(self, "__classify").SelfCleanEnabled
 	end
 
 	-- __classname is no longer required! but we'll still support it just in case...
@@ -155,6 +159,10 @@ function Classify.meta.__newindex(self: {}, key: string, value: any)
 		return
 	end
 
+	if key == "SelfCleanEnabled" then
+		rawget(self, "__classify").SelfCleanEnabled = value or false
+	end
+
 	local properties = rawget(self, "__properties")
 	local success = false
 
@@ -244,6 +252,10 @@ end
 
 --[ Classify-injected Private Functions ]--
 function Classify.prototype:_markTrash(trash: any)
+	if trash == nil then
+		error("Cannot ::_markTrash() that is nil.")
+	end
+
 	if type(trash) == "table" then
 		for _, value in trash do
 			table.insert(rawget(self, "__classify").Trash, value)
@@ -290,13 +302,12 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any): 
 		return
 	end
 
-	super = deepCopy(super).new()
-
+	local newSuper = super.new()
 	local selfMeta = rawget(self, "__classify")
 	local selfProperties = rawget(self, "__properties")
-	local superMeta = rawget(super, "__classify")
-	local superProperties = rawget(super, "__properties")
-	local onInherit = rawget(super, "_onInherit")
+	local superMeta = rawget(newSuper, "__classify")
+	local superProperties = rawget(newSuper, "__properties")
+	local onInherit = rawget(newSuper, "_onInherit")
 
 	for key, handlers in superProperties do
 		if selfProperties[key] and not overwrite then
@@ -318,7 +329,7 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any): 
 		table.insert(selfMeta.ProtectedKeys, key)
 	end
 
-	for key, value in super do
+	for key, value in newSuper do
 		if key == "_onDestroy" or key == "new" then
 			continue
 		end
@@ -331,10 +342,10 @@ function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any): 
 	end
 
 	superMeta.CleaningCallbacks = {}
-	table.insert(selfMeta.Trash, super)
+	table.insert(selfMeta.Trash, newSuper)
 
 	if onInherit then
-		onInherit(super, self, ...)
+		onInherit(newSuper, self, ...)
 	end
 
 	return self
@@ -366,21 +377,23 @@ function Classify.prototype:Destroy(...: any)
 	local meta = rawget(self, "__classify")
 	local trash = meta.Trash
 
-	for key, value in self do
-		if table.find(meta.ProtectedKeys, key) then
-			continue
-		end
+	if meta.SelfCleanEnabled then
+		for key, value in self do
+			if table.find(meta.ProtectedKeys, key) then
+				continue
+			end
 
-		local canClean = false
+			local canClean = false
 
-		if typeof(value) == "RBXScriptConnection" or typeof(value) == "Instance" then
-			canClean = true
-		elseif type(value) == "table" and value.Destroy then
-			canClean = true
-		end
+			if typeof(value) == "RBXScriptConnection" or typeof(value) == "Instance" then
+				canClean = true
+			elseif type(value) == "table" and value.Destroy then
+				canClean = true
+			end
 
-		if canClean then
-			table.insert(trash, value)
+			if canClean then
+				table.insert(trash, value)
+			end
 		end
 	end
 
@@ -390,13 +403,15 @@ function Classify.prototype:Destroy(...: any)
 	while item ~= nil do
 		trash[index] = nil
 
-		if typeof(item) == "RBXScriptConnection" then
-			item:Disconnect()
-		elseif type(item) == "function" then
-			item()
-		elseif item.Destroy then
-			item:Destroy()
-		end
+		pcall(function()
+			if typeof(item) == "RBXScriptConnection" then
+				item:Disconnect()
+			elseif type(item) == "function" then
+				item()
+			elseif item.Destroy then
+				return item:Destroy()
+			end
+		end)
 
 		index, item = next(trash)
 	end
@@ -427,10 +442,11 @@ return function(class: {}, lite: boolean?): table
 	end
 
 	rawset(proxy, "__classify", {
-		Trash = {},
 		CleaningCallbacks = { rawget(proxy, "_onDestroy") },
 		PropertySignals = {},
 		ProtectedKeys = {},
+		SelfCleanEnabled = true,
+		Trash = {},
 	})
 
 	result = deepCopy(proxy)
