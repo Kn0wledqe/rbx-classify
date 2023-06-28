@@ -379,7 +379,9 @@ function Classify.prototype:Destroy(...: any)
 
 	if meta.SelfCleaningEnabled then
 		for key, value in self do
+			-- prevent strong references remaining on protected keys
 			if table.find(meta.ProtectedKeys, key) then
+				rawset(self, key, nil)
 				continue
 			end
 
