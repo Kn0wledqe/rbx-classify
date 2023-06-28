@@ -15,6 +15,7 @@
         3. [Intercepting Destruction](#413---intercepting-destruction)
         4. [Handling Destroyed Classes](#414---handling-destroyed-classes)
         5. [Protecting Keys](#415---protecting-keys)
+        6. [Disabling Self-Cleaning](#416---disabling-self-cleaning)
     2. [Inheritance](#42---inheritance)
         1. [Important Notes Before Continuing](#421---important-notes-before-continuing)
         2. [Creating Child & Super Classes](#422---creating-child--super-classes)
@@ -215,6 +216,26 @@ function MyClass.new()
     -- within a table will not be targeted for destruction.
     self._objects = {}
     self._objects.partToKeep = Instance.new("Part")
+
+    return self
+end
+```
+<br>
+
+### 4.1.6 - Disabling Self-Cleaning
+In extremely rare circumstances, you may find it necessary to completely disable the self-cleaning functionality of Classify's injected `::Destroy()` method. Please understand that disabling this functionality can open up potentially serious memory leaks in classes that are frequently created and destroyed.
+
+**As such, you should not make a habit of disabling the self-cleaning feature. It's on by default for a reason!** Virtually all use cases for disabling self-cleaning stem from improper use of Classify or a lack of understanding OOP fundamentals. Consider rethinking your workflow if you find yourself utilizing this feature on any sort of frequent basis.
+
+If you still insist on disabling self-cleaning, simply set `SelfCleaningEnabled` to `false` in your constructor:
+```lua
+function MyClass.new()
+    local self = Classify(MyClass)
+
+    self.SelfCleaningEnabled = false
+
+    -- This part will not be destroyed now, unless you mark it as trash.
+    self.partToKeep = Instance.new("Part")
 
     return self
 end

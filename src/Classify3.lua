@@ -51,8 +51,8 @@ function Classify.meta.__index(self: {}, key: string): any
 		return nil
 	end
 
-	if key == "SelfCleanEnabled" then
-		return rawget(self, "__classify").SelfCleanEnabled
+	if key == "SelfCleaningEnabled" then
+		return rawget(self, "__classify").SelfCleaningEnabled
 	end
 
 	-- __classname is no longer required! but we'll still support it just in case...
@@ -159,8 +159,8 @@ function Classify.meta.__newindex(self: {}, key: string, value: any)
 		return
 	end
 
-	if key == "SelfCleanEnabled" then
-		rawget(self, "__classify").SelfCleanEnabled = value or false
+	if key == "SelfCleaningEnabled" then
+		rawget(self, "__classify").SelfCleaningEnabled = value or false
 	end
 
 	local properties = rawget(self, "__properties")
@@ -377,7 +377,7 @@ function Classify.prototype:Destroy(...: any)
 	local meta = rawget(self, "__classify")
 	local trash = meta.Trash
 
-	if meta.SelfCleanEnabled then
+	if meta.SelfCleaningEnabled then
 		for key, value in self do
 			if table.find(meta.ProtectedKeys, key) then
 				continue
@@ -445,7 +445,7 @@ return function(class: {}, lite: boolean?): table
 		CleaningCallbacks = { rawget(proxy, "_onDestroy") },
 		PropertySignals = {},
 		ProtectedKeys = {},
-		SelfCleanEnabled = true,
+		SelfCleaningEnabled = true,
 		Trash = {},
 	})
 
