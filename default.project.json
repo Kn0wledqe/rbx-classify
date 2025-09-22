@@ -1,13 +1,14 @@
 {
-    "name": "Classify 3.0",
-    "tree": {
-        "$className": "DataModel",
-        "ReplicatedStorage": {
-            "$className": "ReplicatedStorage",
-            "$ignoreUnknownInstances": true,
-            "Classify": {
-                "$path": "src/Classify3.lua"
-            }
-        }
+  "name": "rbx-classify",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "Classify": {
+        "$path": "src"
+      }
     }
+  }
 }

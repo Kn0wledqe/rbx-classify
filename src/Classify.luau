@@ -1,8 +1,8 @@
 --[[
-	File: Classify.lua
-	Author(s): Eric Karolchyk
-	Created: 11/25/2022 @ 19:42:53
-	Version: 3.2.0
+	File: Init.lua
+	Author(s): Eric Karolchyk(Original Creator), Kn0wledqe
+	Created: 09/22/2025 @ 16:00:00
+	Version: 1
 
 	Description:
 		Provides a simple-to-use OOP class wrapper to easily create
@@ -56,8 +56,8 @@ function Classify.meta.__index(self: {}, key: string): any
 	end
 
 	-- __classname is no longer required! but we'll still support it just in case...
-	if key == "ClassName" and rawget(self, "__classname") then
-		return rawget(self, "__classname")
+	if key == "ClassName" then
+		return rawget(self, "ClassName")
 	end
 
 	-- check if a private key exists in the class table before continuing
@@ -247,11 +247,11 @@ function Classify.meta.__tostring(self: {}): string
 		return "nil"
 	end
 
-	return self.Name or self.ClassName or "nil"
+	return self.ClassName or "nil"
 end
 
 --[ Classify-injected Private Functions ]--
-function Classify.prototype:_markTrash(trash: any)
+function Classify.prototype:_markTrash(trash: TrashType): nil
 	if trash == nil then
 		error("Cannot ::_markTrash() that is nil.")
 	end
@@ -265,14 +265,16 @@ function Classify.prototype:_markTrash(trash: any)
 	end
 end
 
-function Classify.prototype:_redirectNullKeys(target: any)
-	if not self then return end
+function Classify.prototype:_redirectNullKeys(target: table): nil
+	if not self then
+		return
+	end
 	rawget(self, "__classify").NullTarget = target
 end
 
 -- the price to pay for kinda-clean output is apparently ugly code (i'm sorry)
-function Classify.prototype:_printClassData()
-	local resultStr = `{self.__classname or self.ClassName or "Class Data"}:\n  Keys:\n`
+function Classify.prototype:_printClassData(): nil
+	local resultStr = `{self.ClassName or "Class Data"}:\n  Keys:\n`
 
 	for key, value in self do
 		local prefix = ""
@@ -281,8 +283,12 @@ function Classify.prototype:_printClassData()
 		local typeLenDiff = 20 - #typeStr
 		local valueLenDiff = 30 - #key
 
-		if typeLenDiff <= 0 then typeLenDiff = 4 end
-		if valueLenDiff <= 0 then valueLenDiff = 4 end
+		if typeLenDiff <= 0 then
+			typeLenDiff = 4
+		end
+		if valueLenDiff <= 0 then
+			valueLenDiff = 4
+		end
 
 		if key:find("_") == 1 then
 			prefix ..= "private    " .. typeStr
@@ -296,62 +302,7 @@ function Classify.prototype:_printClassData()
 	print(resultStr)
 end
 
-function Classify.prototype:_inherit(super: {}, overwrite: boolean?, ...: any): {any}
-	if not super.new then
-		error("Cannot inherit a class without a .new() constructor.", 2)
-		return
-	end
-
-	local newSuper = super.new()
-	local selfMeta = rawget(self, "__classify")
-	local selfProperties = rawget(self, "__properties")
-	local superMeta = rawget(newSuper, "__classify")
-	local superProperties = rawget(newSuper, "__properties")
-	local onInherit = rawget(newSuper, "_onInherit")
-
-	for key, handlers in superProperties do
-		if selfProperties[key] and not overwrite then
-			continue
-		end
-
-		selfProperties[key] = handlers
-	end
-
-	for _, trashItem in superMeta.Trash do
-		table.insert(selfMeta.Trash, trashItem)
-	end
-
-	for _, callback in superMeta.CleaningCallbacks do
-		table.insert(selfMeta.CleaningCallbacks, callback)
-	end
-
-	for _, key in superMeta.ProtectedKeys do
-		table.insert(selfMeta.ProtectedKeys, key)
-	end
-
-	for key, value in newSuper do
-		if key == "_onDestroy" or key == "new" then
-			continue
-		end
-
-		if rawget(self, key) and not overwrite then
-			continue
-		end
-
-		rawset(self, key, value)
-	end
-
-	superMeta.CleaningCallbacks = {}
-	table.insert(selfMeta.Trash, newSuper)
-
-	if onInherit then
-		onInherit(newSuper, self, ...)
-	end
-
-	return self
-end
-
-function Classify.prototype:_protect(key: string)
+function Classify.prototype:_protect(key: string): nil
 	table.insert(rawget(self, "__classify").ProtectedKeys, key)
 end
 
@@ -428,14 +379,58 @@ function Classify.prototype:Destroy(...: any)
 	self = nil
 end
 
+--[ Type ]--
+export type TrashType = RBXScriptConnection | Instance | (() -> nil)
+export type TrashParameter = TrashType | { TrashType }
+
+export type Classify = {
+	-- public properties
+	Destroyed: boolean,
+	SelfCleaningEnabled: boolean,
+	ClassName: string,
+	Name: string,
+
+	-- public functions
+	GetPropertyChangedSignal: (string) -> RBXScriptConnection | nil,
+	Destroy: (...any) -> nil,
+
+	-- internal functions
+	_markTrash: (...TrashParameter) -> nil,
+	_redirectNullKeys: (table) -> nil,
+	_protect: (string) -> nil,
+	_printClassData: () -> nil,
+
+	-- internal variables
+	__classify: {
+		CleaningCallbacks: { (table, ...any) -> nil },
+		PropertySignals: { string | RBXScriptConnection },
+		ProtectedKeys: { string },
+		SelfCleaningEnabled: boolean,
+		NullTarget: table,
+		Trash: { any },
+	},
+
+	__properties: {
+		[string]: {
+			get: (table) -> any,
+			set: (table, any) -> nil,
+			internal: string,
+			bind: string,
+			target: (table) -> Instance,
+			bindTarget: string | (table) -> table,
+		},
+	},
+}
+
 --[ Main Classify Function ]--
 
+--[[
 ---Base Classify constructor wrap function.
 ---@param class table The class table to wrap with Classify.
 ---@param lite boolean? Optional flag to disable injecting Classify internal functions. Custom properties will still work.
 ---@return table
 return function(class: {}, lite: boolean?): table
-	local proxy, result = deepCopy(class)
+	local proxy, result = deepCopy(class), nil
 
 	deepCopy(Classify.meta, proxy)
 
@@ -453,4 +448,32 @@ return function(class: {}, lite: boolean?): table
 
 	result = deepCopy(proxy)
 	return setmetatable(result, proxy)
+end
+]]
+
+local initializedClasses = {}
+return function(_class: {}, lite: boolean?): Classify
+	-- Reuse cached class wrapper if available
+	local class = initializedClasses[_class]
+	if not class then
+		class = deepCopy(_class)
+		deepCopy(Classify.meta, class)
+		table.freeze(class)
+		initializedClasses[_class] = class
+	end
+
+	local object = {}
+	rawset(object, "__classify", {
+		CleaningCallbacks = { rawget(class, "_onDestroy") },
+		PropertySignals = {},
+		ProtectedKeys = {},
+		SelfCleaningEnabled = true,
+		Trash = {},
+	})
+
+	if not lite then
+		deepCopy(Classify.prototype, object)
+	end
+
+	return setmetatable(object, class)
 end

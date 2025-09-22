@@ -1,0 +1,11 @@
+[package]
+name = "kn0wledqe/rbx-classify"
+description = "A simple and easy-to-use OOP class wrapper for Roblox."
+authors = ["Kn0wledqe", "doctr-oof"]
+license = "MIT"
+version = "0.0.3"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+exclude = ["aftman.toml"]
+
+[dependencies]
